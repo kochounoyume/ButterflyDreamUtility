@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Threading;
 using UnityEngine;
 
 namespace ButterflyDreamUtility.Extension
@@ -8,7 +7,7 @@ namespace ButterflyDreamUtility.Extension
 
     public static class AudioExtension
     {
-        private static Dictionary<int, CancellationTokenSource> beforeVolumeActionCancelTable = new Dictionary<int, CancellationTokenSource>(0);
+        private static Dictionary<int, TweenRunner<FloatTween>> beforeVolumeTweenRunnerTable = new Dictionary<int, TweenRunner<FloatTween>>(0);
 
         /// <summary>
         /// AudioSourceの音量をフェードする
@@ -28,22 +27,18 @@ namespace ButterflyDreamUtility.Extension
         ///         audioSource.volume = 0;
         ///         audioSource.Play();
         ///
-        ///         yield return null;
-        ///
         ///         // 音量をフェードインする
-        ///         var cancellationTokenSource1 = audioSource.FadeTween(1, 1.0f);
+        ///         audioSource.FadeTween(1, 1.0f);
         ///
         ///         yield return new WaitForSeconds(0.5f);
         ///
-        ///         // フェードインをキャンセルする
-        ///         cancellationTokenSource1.Cancel();
-        ///         // 音量をフェードアウトする
-        ///         var cancellationTokenSource2 = audioSource.FadeTween(0, 1.0f);
+        ///         // 音量をフェードアウトする（前のTweenは自動的に停止）
+        ///         audioSource.FadeTween(0, 1.0f);
         ///
         ///         yield return new WaitForSeconds(0.5f);
         ///
         ///         // フェードアウトをキャンセルする
-        ///         cancellationTokenSource2.Cancel();
+        ///         audioSource.FadeStopTween();
         ///     }
         /// }
         /// ]]>
@@ -53,21 +48,20 @@ namespace ButterflyDreamUtility.Extension
         /// <param name="target">AudioSource</param>
         /// <param name="endValue">フェード後の音量</param>
         /// <param name="duration">フェード時間</param>
+        /// <param name="isIgnoreTimeScale">Time.timeScaleを無視するかどうか</param>
         /// <returns>フェードを停止するためのキャンセルトークン</returns>
-        public static CancellationTokenSource FadeTween(this AudioSource target, float endValue, float duration)
+        public static void FadeTween(this AudioSource target, float endValue, float duration, bool isIgnoreTimeScale = false)
         {
-            if (target == null) return null;
+            if (target == null) return;
             
             int id = target.GetInstanceID();
-            bool isBeforeTableContain = beforeVolumeActionCancelTable.ContainsKey(id);
+            bool isBeforeTableContain = beforeVolumeTweenRunnerTable.ContainsKey(id);
 
             // 前回のフェードをキャンセルする
             if (isBeforeTableContain)
             {
-                var beforeTokenSource = beforeVolumeActionCancelTable[id];
-                beforeTokenSource.Cancel();
-                beforeTokenSource.Dispose();
-                beforeVolumeActionCancelTable[id] = null;
+                beforeVolumeTweenRunnerTable[id].StopTween();
+                beforeVolumeTweenRunnerTable[id] = null;
             }
 
             float currentValue = target.volume;
@@ -75,28 +69,43 @@ namespace ButterflyDreamUtility.Extension
             if (Mathf.Approximately(currentValue, endValue))
             {
                 target.volume = endValue;
-                return null;
+                return;
             }
 
-            var colorTween = new FloatTween(currentValue, endValue, duration, true);
+            var colorTween = new FloatTween(currentValue, endValue, duration, isIgnoreTimeScale);
             colorTween.onTweenChanged += _ => target.volume = _;
-            TweenRunner<FloatTween> floatTweenRunner = new TweenRunner<FloatTween>(target, out CancellationTokenSource cancellationTokenSource);
+            TweenRunner<FloatTween> floatTweenRunner = new TweenRunner<FloatTween>(target);
             floatTweenRunner.StartTween(colorTween);
             
             // 今回のフェードを登録する
             if (isBeforeTableContain)
             {
-                beforeVolumeActionCancelTable[id] = cancellationTokenSource;
+                beforeVolumeTweenRunnerTable[id] = floatTweenRunner;
             }
             else
             {
-                beforeVolumeActionCancelTable.EnsureCapacity(beforeVolumeActionCancelTable.Count + 1);
-                beforeVolumeActionCancelTable.Add(id, cancellationTokenSource);
+                beforeVolumeTweenRunnerTable.Add(id, floatTweenRunner);
             }
             // フェードが終了したらテーブルから削除する処理を登録しておく
-            floatTweenRunner.onTokenSourceDisposed += () => beforeVolumeActionCancelTable.Remove(id);
+            floatTweenRunner.onTweenStoped += () => beforeVolumeTweenRunnerTable.Remove(id);
+        }
+        
+        /// <summary>
+        /// AudioSourceの音量をフェードを停止する
+        /// </summary>
+        /// <param name="target">AudioSource</param>
+        public static void FadeStopTween(this AudioSource target)
+        {
+            if (target == null) return;
+            
+            int id = target.GetInstanceID();
 
-            return cancellationTokenSource;
+            // 前回のフェードをキャンセルする
+            if (beforeVolumeTweenRunnerTable.ContainsKey(id))
+            {
+                beforeVolumeTweenRunnerTable[id].StopTween();
+                beforeVolumeTweenRunnerTable[id] = null;
+            }
         }
     }
 }

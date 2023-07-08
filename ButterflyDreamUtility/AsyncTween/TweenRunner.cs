@@ -15,7 +15,7 @@ namespace ButterflyDreamUtility.AsyncTween
         /// <summary>
         /// トゥイーンのキャンセルトークンソース
         /// </summary>
-        private CancellationTokenSource cancellationTokenSource = null;
+        private CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
         
         /// <summary>
         /// 対象のコンポーネントの破棄時のキャンセルトークン
@@ -23,9 +23,9 @@ namespace ButterflyDreamUtility.AsyncTween
         private readonly CancellationToken destroyToken = CancellationToken.None;
 
         /// <summary>
-        /// TokenSourceが破棄されたときに呼び出されるイベント
+        /// TokenSourceが停止したときに呼び出されるイベント
         /// </summary>
-        public event UnityAction onTokenSourceDisposed = null;
+        public event UnityAction onTweenStoped = null;
         
         /// <summary>
         /// コンストラクタ（主にUnityのコンポーネントクラス用）
@@ -35,18 +35,6 @@ namespace ButterflyDreamUtility.AsyncTween
         {
             this.destroyToken = cancelTokenContainer.GetCancellationTokenOnDestroy();
             this.cancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(destroyToken);
-        }
-        
-        /// <summary>
-        /// コンストラクタ（主にUnityのコンポーネントクラス用）
-        /// </summary>
-        /// <param name="cancelTokenContainer">該当のコンポーネントのインスタンス</param>
-        /// <param name="cancellationTokenSource">外部からトゥイーンのキャンセルを行うためのトークンソース</param>
-        public TweenRunner(Component cancelTokenContainer, out CancellationTokenSource cancellationTokenSource)
-        {
-            this.destroyToken = cancelTokenContainer.GetCancellationTokenOnDestroy();
-            this.cancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(destroyToken);
-            cancellationTokenSource = this.cancellationTokenSource;
         }
 
         /// <summary>
@@ -63,18 +51,21 @@ namespace ButterflyDreamUtility.AsyncTween
         /// </summary>
         /// <param name="tweenInfo">トゥイーン構造体</param>
         /// <param name="cancellationToken">キャンセルトークン</param>
-        private static async UniTask Entry(T tweenInfo, CancellationToken cancellationToken)
+        private async UniTask Entry(T tweenInfo, CancellationToken cancellationToken)
         {
             if (!tweenInfo.IsValidTarget()) return;
 
             float elapsedTime = 0.0f;
             while (elapsedTime < tweenInfo.duration)
             {
-                elapsedTime += tweenInfo.isIgnoreTimeScale ? Time.unscaledDeltaTime : Time.deltaTime;
+                // Time.unscaledDeltaTimeがなんだか挙動おかしいので、Time.deltaTime * Time.timeScaleを使う
+                elapsedTime += tweenInfo.isIgnoreTimeScale ? Time.deltaTime * Time.timeScale : Time.deltaTime;
                 tweenInfo.TweenValue(Mathf.Clamp01(elapsedTime / tweenInfo.duration));
                 await UniTask.Yield(cancellationToken);
             }
             tweenInfo.TweenValue(1.0f);
+            // キャンセルトークンソースをリセット
+            StopTween();
         }
 
         /// <summary>
@@ -95,10 +86,10 @@ namespace ButterflyDreamUtility.AsyncTween
             if (cancellationTokenSource is {IsCancellationRequested: false})
             {
                 cancellationTokenSource.Cancel();
-                cancellationTokenSource.Dispose();
-                cancellationTokenSource = null;
-                onTokenSourceDisposed?.Invoke();
             }
+            cancellationTokenSource.Dispose();
+            cancellationTokenSource = null;
+            onTweenStoped?.Invoke();
         }
     }
 }
