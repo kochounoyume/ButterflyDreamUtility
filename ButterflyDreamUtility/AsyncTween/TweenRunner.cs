@@ -1,8 +1,10 @@
 ﻿using System.Threading;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.Events;
 
-namespace ButterflyDream.Utility.AsyncTween
+
+namespace ButterflyDreamUtility.AsyncTween
 {
     /// <summary>
     /// 与えられたトゥイーンを実行するトゥイーンランナー
@@ -19,6 +21,11 @@ namespace ButterflyDream.Utility.AsyncTween
         /// 対象のコンポーネントの破棄時のキャンセルトークン
         /// </summary>
         private readonly CancellationToken destroyToken = CancellationToken.None;
+
+        /// <summary>
+        /// TokenSourceが破棄されたときに呼び出されるイベント
+        /// </summary>
+        public event UnityAction onTokenSourceDisposed = null;
         
         /// <summary>
         /// コンストラクタ（主にUnityのコンポーネントクラス用）
@@ -90,6 +97,7 @@ namespace ButterflyDream.Utility.AsyncTween
                 cancellationTokenSource.Cancel();
                 cancellationTokenSource.Dispose();
                 cancellationTokenSource = null;
+                onTokenSourceDisposed?.Invoke();
             }
         }
     }

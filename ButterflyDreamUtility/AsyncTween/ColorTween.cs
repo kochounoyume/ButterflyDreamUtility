@@ -2,7 +2,7 @@
 using UnityEngine;
 using UnityEngine.Events;
 
-namespace ButterflyDream.Utility.AsyncTween
+namespace ButterflyDreamUtility.AsyncTween
 {
     /// <summary>
     /// Color型のトゥイーン構造体
@@ -16,10 +16,8 @@ namespace ButterflyDream.Utility.AsyncTween
             Alpha
         }
         
-        /// <summary>
-        /// トゥイーンする処理
-        /// </summary>
-        private event UnityAction<Color> target;
+        /// <inheritdoc />
+        public event UnityAction<Color> onTweenChanged;
 
         /// <inheritdoc />
         public Color startValue { get; }
@@ -53,13 +51,13 @@ namespace ButterflyDream.Utility.AsyncTween
             this.targetValue = targetValue;
             this.duration = duration;
             this.isIgnoreTimeScale = isIgnoreTimeScale;
-            target = null;
+            onTweenChanged = null;
         }
 
         /// <inheritdoc />
         public void TweenValue(float floatPercentage)
         {
-            if (target == null) return;
+            if (onTweenChanged == null) return;
             
             var newColor = Color.Lerp(startValue, targetValue, floatPercentage);
 
@@ -82,19 +80,10 @@ namespace ButterflyDream.Utility.AsyncTween
                 default:
                     throw new ArgumentOutOfRangeException();
             }
-            target.Invoke(newColor);
-        }
-
-        /// <summary>
-        /// トゥイーンしたい処理を登録する
-        /// </summary>
-        /// <param name="callback">トゥイーンしたい処理</param>
-        public void AddOnChangedCallback(UnityAction<Color> callback)
-        {
-            target += callback;
+            onTweenChanged.Invoke(newColor);
         }
 
         /// <inheritdoc />
-        public bool IsValidTarget() => target != null;
+        public bool IsValidTarget() => onTweenChanged != null;
     }
 }
