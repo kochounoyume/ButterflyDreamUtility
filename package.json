@@ -9,5 +9,8 @@
     "Log"
   ],
   "licensesUrl": "https://github.com/kochounoyume/ButterflyDreamUtility/blob/main/LICENSE",
-  "author": "kochounoyume"
+  "author": "kochounoyume",
+  "dependencies": {
+    "com.cysharp.unitask": ""
+  }
 }
