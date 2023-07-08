@@ -77,6 +77,9 @@ namespace ButterflyDreamUtility.Extension
             TweenRunner<FloatTween> floatTweenRunner = new TweenRunner<FloatTween>(target);
             floatTweenRunner.StartTween(colorTween);
             
+            // フェードが終了したらテーブルから削除する処理を登録しておく
+            floatTweenRunner.onTweenStoped += () => beforeVolumeTweenRunnerTable.Remove(id);
+            
             // 今回のフェードを登録する
             if (isBeforeTableContain)
             {
@@ -86,8 +89,6 @@ namespace ButterflyDreamUtility.Extension
             {
                 beforeVolumeTweenRunnerTable.Add(id, floatTweenRunner);
             }
-            // フェードが終了したらテーブルから削除する処理を登録しておく
-            floatTweenRunner.onTweenStoped += () => beforeVolumeTweenRunnerTable.Remove(id);
         }
         
         /// <summary>
