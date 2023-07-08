@@ -4,9 +4,9 @@ using UnityEngine;
 namespace ButterflyDreamUtility.Constants
 {
     /// <summary>
-    /// Color32型の定数構造体
+    /// Color32型の定数定義クラス
     /// </summary>
-    public struct ConstantColor32
+    public sealed class ConstantColor32
     {
         /// <summary>
         /// <para>赤単色. RGBAは(255, 0, 0, 255).</para>
