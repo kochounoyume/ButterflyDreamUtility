@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 
 namespace ButterflyDreamUtility.Extension
@@ -52,7 +53,34 @@ namespace ButterflyDreamUtility.Extension
         /// <returns>フェードを停止するためのキャンセルトークン</returns>
         public static void FadeTween(this AudioSource target, float endValue, float duration, bool isIgnoreTimeScale = false)
         {
-            if (target == null) return;
+            TweenDataSet<FloatTween> dataSet = SetFadeTween(target, endValue, duration, isIgnoreTimeScale);
+            dataSet.tweenRunner.StartTween(dataSet.tweenValue);
+        }
+
+        /// <summary>
+        /// AudioSourceの音量を非同期でフェードする
+        /// </summary>
+        /// <param name="target">AudioSource</param>
+        /// <param name="endValue">フェード後の音量</param>
+        /// <param name="duration">フェード時間</param>
+        /// <param name="isIgnoreTimeScale">Time.timeScaleを無視するかどうか</param>
+        public static async UniTask FadeTweenAsync(this AudioSource target, float endValue, float duration, bool isIgnoreTimeScale = false)
+        {
+            TweenDataSet<FloatTween> dataSet = SetFadeTween(target, endValue, duration, isIgnoreTimeScale);
+            await dataSet.tweenRunner.StartTweenAsync(dataSet.tweenValue);
+        }
+
+        /// <summary>
+        /// フェードを設定する
+        /// </summary>
+        /// <param name="target">AudioSource</param>
+        /// <param name="endValue">フェード後の音量</param>
+        /// <param name="duration">フェード時間</param>
+        /// <param name="isIgnoreTimeScale">Time.timeScaleを無視するかどうか</param>
+        /// <returns>フェードデータセット</returns>
+        private static TweenDataSet<FloatTween> SetFadeTween(this AudioSource target, float endValue, float duration, bool isIgnoreTimeScale = false)
+        {
+            if (target == null) return default;
             
             int id = target.GetInstanceID();
             bool isBeforeTableContain = beforeVolumeTweenRunnerTable.ContainsKey(id);
@@ -69,17 +97,13 @@ namespace ButterflyDreamUtility.Extension
             if (Mathf.Approximately(currentValue, endValue))
             {
                 target.volume = endValue;
-                return;
+                return default;
             }
 
-            var colorTween = new FloatTween(currentValue, endValue, duration, isIgnoreTimeScale);
-            colorTween.onTweenChanged += _ => target.volume = _;
+            var floatTween = new FloatTween(currentValue, endValue, duration, isIgnoreTimeScale);
+            floatTween.onTweenChanged += _ => target.volume = _;
             TweenRunner<FloatTween> floatTweenRunner = new TweenRunner<FloatTween>(target);
-            floatTweenRunner.StartTween(colorTween);
-            
-            // フェードが終了したらテーブルから削除する処理を登録しておく
-            floatTweenRunner.onTweenStoped += () => beforeVolumeTweenRunnerTable.Remove(id);
-            
+
             // 今回のフェードを登録する
             if (isBeforeTableContain)
             {
@@ -89,6 +113,11 @@ namespace ButterflyDreamUtility.Extension
             {
                 beforeVolumeTweenRunnerTable.Add(id, floatTweenRunner);
             }
+            
+            // フェードが終了したらテーブルから削除する処理を登録しておく
+            floatTweenRunner.onTweenStoped += () => beforeVolumeTweenRunnerTable.Remove(id);
+
+            return new TweenDataSet<FloatTween>(floatTween, floatTweenRunner);
         }
         
         /// <summary>

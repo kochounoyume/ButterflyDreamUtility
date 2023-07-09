@@ -3,14 +3,13 @@ using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Events;
 
-
 namespace ButterflyDreamUtility.AsyncTween
 {
     /// <summary>
     /// 与えられたトゥイーンを実行するトゥイーンランナー
     /// </summary>
     /// <typeparam name="T">トゥイーン構造体</typeparam>
-    public sealed class TweenRunner<T> where T : struct, ITweenValueBase
+    public sealed class TweenRunner<T> where T : ITweenValueBase
     {
         /// <summary>
         /// トゥイーンのキャンセルトークンソース
@@ -26,7 +25,7 @@ namespace ButterflyDreamUtility.AsyncTween
         /// TokenSourceが停止したときに呼び出されるイベント
         /// </summary>
         public event UnityAction onTweenStoped = null;
-        
+
         /// <summary>
         /// コンストラクタ（主にUnityのコンポーネントクラス用）
         /// </summary>
@@ -47,21 +46,20 @@ namespace ButterflyDreamUtility.AsyncTween
         }
 
         /// <summary>
-        /// トゥイーンを実行する
+        /// 非同期でトゥイーンを実行する
         /// </summary>
         /// <param name="tweenInfo">トゥイーン構造体</param>
         /// <param name="cancellationToken">キャンセルトークン</param>
-        private async UniTask Entry(T tweenInfo, CancellationToken cancellationToken)
+        private async UniTask AsyncDoTween(T tweenInfo, CancellationToken cancellationToken)
         {
             if (!tweenInfo.IsValidTarget()) return;
-
+            
             float elapsedTime = 0.0f;
             while (elapsedTime < tweenInfo.duration)
             {
-                // Time.unscaledDeltaTimeがなんだか挙動おかしいので、Time.deltaTime * Time.timeScaleを使う
-                elapsedTime += tweenInfo.isIgnoreTimeScale ? Time.deltaTime * Time.timeScale : Time.deltaTime;
+                elapsedTime += tweenInfo.isIgnoreTimeScale ? Time.unscaledDeltaTime : Time.deltaTime;
                 tweenInfo.TweenValue(Mathf.Clamp01(elapsedTime / tweenInfo.duration));
-                await UniTask.Yield(cancellationToken);
+                await UniTask.DelayFrame(1, PlayerLoopTiming.Update, cancellationToken);
             }
             tweenInfo.TweenValue(1.0f);
             // キャンセルトークンソースをリセット
@@ -75,7 +73,16 @@ namespace ButterflyDreamUtility.AsyncTween
         public void StartTween(T info)
         {
             // 投げっぱなしでトゥイーン開始
-            Entry(info, cancellationTokenSource.Token).Forget();
+            AsyncDoTween(info, cancellationTokenSource.Token).Forget();
+        }
+        
+        /// <summary>
+        /// トゥイーン開始処理
+        /// </summary>
+        /// <param name="info">トゥイーン構造体</param>
+        public async UniTask StartTweenAsync(T info)
+        {
+            await AsyncDoTween(info, cancellationTokenSource.Token);
         }
 
         /// <summary>
