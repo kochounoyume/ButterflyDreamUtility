@@ -1,11 +1,10 @@
 ﻿namespace ButterflyDreamUtility.AsyncTween
 {
     /// <summary>
-    /// トゥイーンの情報と実行クラスをセットにした構造体
+    /// トゥイーンの情報と対象クラスの情報をセットにした構造体
     /// </summary>
-    /// <typeparam name="T"></typeparam>
-    /// <typeparam name="TTween"></typeparam>
-    public struct TweenDataSet<T> where T : ITweenValueBase
+    /// <typeparam name="T">トゥイーン構造体の型</typeparam>
+    public struct TweenDataSet<T> where T : struct, ITweenValueBase
     {
         /// <summary>
         /// トゥイーン構造体
@@ -13,19 +12,19 @@
         public T tweenValue { get; }
         
         /// <summary>
-        /// トゥイーンランナー
+        /// 対象のインスタンスのid
         /// </summary>
-        public TweenRunner<T> tweenRunner { get; }
-        
+        public int instanceId { get; }
+
         /// <summary>
         /// コンストラクタ
         /// </summary>
         /// <param name="tweenValue">トゥイーン構造体</param>
-        /// <param name="tweenRunner">トゥイーンランナー</param>
-        public TweenDataSet(T tweenValue, TweenRunner<T> tweenRunner)
+        /// <param name="instanceId">対象のインスタンスのid</param>
+        public TweenDataSet(T tweenValue, int instanceId = default)
         {
             this.tweenValue = tweenValue;
-            this.tweenRunner = tweenRunner;
+            this.instanceId = instanceId;
         }
     }
 }

@@ -8,7 +8,7 @@ namespace ButterflyDreamUtility.Extension
 
     public static class AudioExtension
     {
-        private static Dictionary<int, TweenRunner<FloatTween>> beforeVolumeTweenRunnerTable = new Dictionary<int, TweenRunner<FloatTween>>(0);
+        private static Dictionary<int, TweenRunner<FloatTween>> volumeTweenRunnerTable = new Dictionary<int, TweenRunner<FloatTween>>(0);
 
         /// <summary>
         /// AudioSourceの音量をフェードする
@@ -54,7 +54,8 @@ namespace ButterflyDreamUtility.Extension
         public static void FadeTween(this AudioSource target, float endValue, float duration, bool isIgnoreTimeScale = false)
         {
             TweenDataSet<FloatTween> dataSet = SetFadeTween(target, endValue, duration, isIgnoreTimeScale);
-            dataSet.tweenRunner.StartTween(dataSet.tweenValue);
+            if(dataSet.Equals(default)) return;
+            volumeTweenRunnerTable[dataSet.instanceId].StartTween(dataSet.tweenValue);
         }
 
         /// <summary>
@@ -67,7 +68,8 @@ namespace ButterflyDreamUtility.Extension
         public static async UniTask FadeTweenAsync(this AudioSource target, float endValue, float duration, bool isIgnoreTimeScale = false)
         {
             TweenDataSet<FloatTween> dataSet = SetFadeTween(target, endValue, duration, isIgnoreTimeScale);
-            await dataSet.tweenRunner.StartTweenAsync(dataSet.tweenValue);
+            if(dataSet.Equals(default)) return;
+            await volumeTweenRunnerTable[dataSet.instanceId].StartTweenAsync(dataSet.tweenValue);
         }
 
         /// <summary>
@@ -83,13 +85,13 @@ namespace ButterflyDreamUtility.Extension
             if (target == null) return default;
             
             int id = target.GetInstanceID();
-            bool isBeforeTableContain = beforeVolumeTweenRunnerTable.ContainsKey(id);
+            bool isBeforeTableContain = volumeTweenRunnerTable.ContainsKey(id);
 
             // 前回のフェードをキャンセルする
             if (isBeforeTableContain)
             {
-                beforeVolumeTweenRunnerTable[id].StopTween();
-                beforeVolumeTweenRunnerTable[id] = null;
+                // キャンセルトークンやイベントをリセットしてランナークラスを使いまわす
+                volumeTweenRunnerTable[id].StopTween();
             }
 
             float currentValue = target.volume;
@@ -102,22 +104,23 @@ namespace ButterflyDreamUtility.Extension
 
             var floatTween = new FloatTween(currentValue, endValue, duration, isIgnoreTimeScale);
             floatTween.onTweenChanged += _ => target.volume = _;
-            TweenRunner<FloatTween> floatTweenRunner = new TweenRunner<FloatTween>(target);
 
-            // 今回のフェードを登録する
-            if (isBeforeTableContain)
+            // TweenRunnerがなければ登録する
+            if (!isBeforeTableContain)
             {
-                beforeVolumeTweenRunnerTable[id] = floatTweenRunner;
+                volumeTweenRunnerTable.Add(id, new TweenRunner<FloatTween>(target));
             }
-            else
-            {
-                beforeVolumeTweenRunnerTable.Add(id, floatTweenRunner);
-            }
-            
+
             // フェードが終了したらテーブルから削除する処理を登録しておく
-            floatTweenRunner.onTweenStoped += () => beforeVolumeTweenRunnerTable.Remove(id);
+            volumeTweenRunnerTable[id].onTweenFinished += OnTweenFinished;
 
-            return new TweenDataSet<FloatTween>(floatTween, floatTweenRunner);
+            return new TweenDataSet<FloatTween>(floatTween, id);
+            
+            void OnTweenFinished()
+            {
+                volumeTweenRunnerTable[id].Dispose();
+                volumeTweenRunnerTable.Remove(id);
+            }
         }
         
         /// <summary>
@@ -131,10 +134,11 @@ namespace ButterflyDreamUtility.Extension
             int id = target.GetInstanceID();
 
             // 前回のフェードをキャンセルする
-            if (beforeVolumeTweenRunnerTable.ContainsKey(id))
+            if (volumeTweenRunnerTable.ContainsKey(id))
             {
-                beforeVolumeTweenRunnerTable[id].StopTween();
-                beforeVolumeTweenRunnerTable[id] = null;
+                volumeTweenRunnerTable[id].StopTween();
+                volumeTweenRunnerTable[id].Dispose();
+                volumeTweenRunnerTable.Remove(id);
             }
         }
     }

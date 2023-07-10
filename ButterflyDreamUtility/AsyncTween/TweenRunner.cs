@@ -1,4 +1,6 @@
-﻿using System.Threading;
+﻿using System;
+using System.Threading;
+using ButterflyDreamUtility.Debug;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Events;
@@ -9,7 +11,7 @@ namespace ButterflyDreamUtility.AsyncTween
     /// 与えられたトゥイーンを実行するトゥイーンランナー
     /// </summary>
     /// <typeparam name="T">トゥイーン構造体</typeparam>
-    public sealed class TweenRunner<T> where T : ITweenValueBase
+    public sealed class TweenRunner<T> : IDisposable where T : ITweenValueBase
     {
         /// <summary>
         /// トゥイーンのキャンセルトークンソース
@@ -22,9 +24,9 @@ namespace ButterflyDreamUtility.AsyncTween
         private readonly CancellationToken destroyToken = CancellationToken.None;
 
         /// <summary>
-        /// TokenSourceが停止したときに呼び出されるイベント
+        /// TokenSourceが無事終了したときに呼び出されるイベント
         /// </summary>
-        public event UnityAction onTweenStoped = null;
+        public event UnityAction onTweenFinished = null;
 
         /// <summary>
         /// コンストラクタ（主にUnityのコンポーネントクラス用）
@@ -33,7 +35,6 @@ namespace ButterflyDreamUtility.AsyncTween
         public TweenRunner(Component cancelTokenContainer)
         {
             this.destroyToken = cancelTokenContainer.GetCancellationTokenOnDestroy();
-            this.cancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(destroyToken);
         }
 
         /// <summary>
@@ -62,8 +63,8 @@ namespace ButterflyDreamUtility.AsyncTween
                 await UniTask.DelayFrame(1, PlayerLoopTiming.Update, cancellationToken);
             }
             tweenInfo.TweenValue(1.0f);
-            // キャンセルトークンソースをリセット
-            StopTween();
+            // トゥイーン終了時のイベントを呼び出す
+            onTweenFinished?.Invoke();
         }
 
         /// <summary>
@@ -72,6 +73,7 @@ namespace ButterflyDreamUtility.AsyncTween
         /// <param name="info">トゥイーン構造体</param>
         public void StartTween(T info)
         {
+            cancellationTokenSource ??= destroyToken != CancellationToken.None ? CancellationTokenSource.CreateLinkedTokenSource(destroyToken) : new CancellationTokenSource();
             // 投げっぱなしでトゥイーン開始
             AsyncDoTween(info, cancellationTokenSource.Token).Forget();
         }
@@ -82,21 +84,29 @@ namespace ButterflyDreamUtility.AsyncTween
         /// <param name="info">トゥイーン構造体</param>
         public async UniTask StartTweenAsync(T info)
         {
+            cancellationTokenSource ??= destroyToken != CancellationToken.None ? CancellationTokenSource.CreateLinkedTokenSource(destroyToken) : new CancellationTokenSource();
             await AsyncDoTween(info, cancellationTokenSource.Token);
         }
 
         /// <summary>
         /// トゥイーン停止処理
+        /// <remarks>
+        /// ランナークラスを使いまわす設計になっている
+        /// </remarks>
         /// </summary>
         public void StopTween()
         {
-            if (cancellationTokenSource is {IsCancellationRequested: false})
-            {
-                cancellationTokenSource.Cancel();
-            }
+            cancellationTokenSource.Cancel();
+            // 使いまわすためのリセット処理
             cancellationTokenSource.Dispose();
             cancellationTokenSource = null;
-            onTweenStoped?.Invoke();
+            onTweenFinished = null;
+        }
+
+        // Disposeが呼ばれるのは、トゥイーン完全終了時と、次のトゥイーンを上書きせず即中断するときのみのはず
+        public void Dispose()
+        {
+            
         }
     }
 }
