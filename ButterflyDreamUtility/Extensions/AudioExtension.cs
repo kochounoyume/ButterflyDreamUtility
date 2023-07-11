@@ -103,7 +103,7 @@ namespace ButterflyDreamUtility.Extensions
             }
 
             var floatTween = new FloatTween(currentValue, endValue, duration, isIgnoreTimeScale);
-            floatTween.onTweenChanged += _ => target.volume = _;
+            floatTween.onTweenChanged += value => target.volume = value;
 
             // TweenRunnerがなければ登録する
             if (!isBeforeTableContain)
@@ -112,10 +112,10 @@ namespace ButterflyDreamUtility.Extensions
                 volumeTweenRunnerTable.Add(id, new TweenRunner<FloatTween>(target , id));
             }
             
-            volumeTweenRunnerTable[id].onTweenFinished += _ =>
+            volumeTweenRunnerTable[id].onTweenFinished += instanceID =>
             {
-                volumeTweenRunnerTable[_].Dispose();
-                volumeTweenRunnerTable.Remove(_);
+                volumeTweenRunnerTable[instanceID].Dispose();
+                volumeTweenRunnerTable.Remove(instanceID);
             };
 
             return new TweenDataSet<FloatTween>(floatTween, id);
