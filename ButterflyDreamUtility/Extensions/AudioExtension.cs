@@ -2,13 +2,13 @@ using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 
-namespace ButterflyDreamUtility.Extension
+namespace ButterflyDreamUtility.Extensions
 {
-    using AsyncTween;
+    using UniTaskTween;
 
     public static class AudioExtension
     {
-        private static Dictionary<int, TweenRunner<FloatTween>> volumeTweenRunnerTable = new Dictionary<int, TweenRunner<FloatTween>>(0);
+        private static Dictionary<int, TweenRunner<FloatTween>> volumeTweenRunnerTable = null;
 
         /// <summary>
         /// AudioSourceの音量をフェードする
@@ -85,7 +85,7 @@ namespace ButterflyDreamUtility.Extension
             if (target == null) return default;
             
             int id = target.GetInstanceID();
-            bool isBeforeTableContain = volumeTweenRunnerTable.ContainsKey(id);
+            bool isBeforeTableContain = volumeTweenRunnerTable != null && volumeTweenRunnerTable.ContainsKey(id);
 
             // 前回のフェードをキャンセルする
             if (isBeforeTableContain)
@@ -108,19 +108,17 @@ namespace ButterflyDreamUtility.Extension
             // TweenRunnerがなければ登録する
             if (!isBeforeTableContain)
             {
-                volumeTweenRunnerTable.Add(id, new TweenRunner<FloatTween>(target));
+                volumeTweenRunnerTable ??= new Dictionary<int, TweenRunner<FloatTween>>(1);
+                volumeTweenRunnerTable.Add(id, new TweenRunner<FloatTween>(target , id));
             }
-
-            // フェードが終了したらテーブルから削除する処理を登録しておく
-            volumeTweenRunnerTable[id].onTweenFinished += OnTweenFinished;
+            
+            volumeTweenRunnerTable[id].onTweenFinished += _ =>
+            {
+                volumeTweenRunnerTable[_].Dispose();
+                volumeTweenRunnerTable.Remove(_);
+            };
 
             return new TweenDataSet<FloatTween>(floatTween, id);
-            
-            void OnTweenFinished()
-            {
-                volumeTweenRunnerTable[id].Dispose();
-                volumeTweenRunnerTable.Remove(id);
-            }
         }
         
         /// <summary>
@@ -134,7 +132,7 @@ namespace ButterflyDreamUtility.Extension
             int id = target.GetInstanceID();
 
             // 前回のフェードをキャンセルする
-            if (volumeTweenRunnerTable.ContainsKey(id))
+            if (volumeTweenRunnerTable != null && volumeTweenRunnerTable.ContainsKey(id))
             {
                 volumeTweenRunnerTable[id].StopTween();
                 volumeTweenRunnerTable[id].Dispose();

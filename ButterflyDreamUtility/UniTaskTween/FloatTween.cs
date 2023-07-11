@@ -2,12 +2,12 @@
 using UnityEngine;
 using UnityEngine.Events;
 
-namespace ButterflyDreamUtility.AsyncTween
+namespace ButterflyDreamUtility.UniTaskTween
 {
     /// <summary>
     /// Float型のトゥイーン構造体
     /// </summary>
-    internal struct FloatTween : ITweenValue<float>
+    internal struct FloatTween : IEquatable<FloatTween>, ITweenValue<float>
     {
         /// <inheritdoc />
         public event UnityAction<float> onTweenChanged;
@@ -48,5 +48,16 @@ namespace ButterflyDreamUtility.AsyncTween
 
         /// <inheritdoc />
         public bool IsValidTarget() => onTweenChanged != null;
+
+        public bool Equals(FloatTween other) 
+            => Mathf.Approximately(startValue, other.startValue)
+               && Mathf.Approximately(targetValue, other.targetValue)
+               && Mathf.Approximately(duration, other.duration)
+               && isIgnoreTimeScale == other.isIgnoreTimeScale 
+               && onTweenChanged == other.onTweenChanged;
+
+        public override bool Equals(object obj) => obj is FloatTween other && Equals(other);
+
+        public override int GetHashCode() => HashCode.Combine(startValue, targetValue, duration, isIgnoreTimeScale, onTweenChanged);
     }
 }

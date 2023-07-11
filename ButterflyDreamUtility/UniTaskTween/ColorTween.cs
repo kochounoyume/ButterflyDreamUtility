@@ -2,12 +2,12 @@
 using UnityEngine;
 using UnityEngine.Events;
 
-namespace ButterflyDreamUtility.AsyncTween
+namespace ButterflyDreamUtility.UniTaskTween
 {
     /// <summary>
     /// Color型のトゥイーン構造体
     /// </summary>
-    public struct ColorTween : ITweenValue<Color>
+    public struct ColorTween : IEquatable<ColorTween>, ITweenValue<Color>
     {
         public enum ColorTweenMode
         {
@@ -85,5 +85,17 @@ namespace ButterflyDreamUtility.AsyncTween
 
         /// <inheritdoc />
         public bool IsValidTarget() => onTweenChanged != null;
+
+        public bool Equals(ColorTween other) 
+            => startValue == other.startValue
+               && targetValue == other.targetValue
+               && Mathf.Approximately(duration, other.duration)
+               && isIgnoreTimeScale == other.isIgnoreTimeScale 
+               && tweenMode == other.tweenMode 
+               && onTweenChanged == other.onTweenChanged;
+
+        public override bool Equals(object obj) => obj is ColorTween other && Equals(other);
+
+        public override int GetHashCode() => HashCode.Combine(startValue, targetValue, duration, isIgnoreTimeScale, (int) tweenMode, onTweenChanged);
     }
 }

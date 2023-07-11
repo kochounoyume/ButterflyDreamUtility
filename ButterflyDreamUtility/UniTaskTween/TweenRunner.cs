@@ -4,13 +4,13 @@ using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Events;
 
-namespace ButterflyDreamUtility.AsyncTween
+namespace ButterflyDreamUtility.UniTaskTween
 {
     /// <summary>
     /// 与えられたトゥイーンを実行するトゥイーンランナー
     /// </summary>
     /// <typeparam name="T">トゥイーン構造体</typeparam>
-    public sealed class TweenRunner<T> : IDisposable where T : ITweenValueBase
+    internal sealed class TweenRunner<T> : IDisposable where T : ITweenValueBase
     {
         /// <summary>
         /// トゥイーンのキャンセルトークンソース
@@ -25,15 +25,22 @@ namespace ButterflyDreamUtility.AsyncTween
         /// <summary>
         /// TokenSourceが無事終了したときに呼び出されるイベント
         /// </summary>
-        public event UnityAction onTweenFinished = null;
+        public event UnityAction<int> onTweenFinished = null;
+        
+        /// <summary>
+        /// コンポーネント拡張での使用時に終了イベント起動で必要なインスタンスid
+        /// </summary>
+        private readonly int instanceId = default;
 
         /// <summary>
         /// コンストラクタ（主にUnityのコンポーネントクラス用）
         /// </summary>
         /// <param name="cancelTokenContainer">該当のコンポーネントのインスタンス</param>
-        public TweenRunner(Component cancelTokenContainer)
+        /// <param name="instanceId">コンポーネント拡張での使用時に終了イベント起動で必要なインスタンスid</param>
+        public TweenRunner(Component cancelTokenContainer, int instanceId = default)
         {
             this.destroyToken = cancelTokenContainer.GetCancellationTokenOnDestroy();
+            this.instanceId = instanceId;
         }
 
         /// <summary>
@@ -63,7 +70,7 @@ namespace ButterflyDreamUtility.AsyncTween
             }
             tweenInfo.TweenValue(1.0f);
             // トゥイーン終了時のイベントを呼び出す
-            onTweenFinished?.Invoke();
+            onTweenFinished?.Invoke(instanceId);
         }
 
         /// <summary>

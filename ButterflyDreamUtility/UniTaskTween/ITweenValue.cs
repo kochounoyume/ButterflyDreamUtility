@@ -1,6 +1,7 @@
-﻿using UnityEngine.Events;
+﻿using System;
+using UnityEngine.Events;
 
-namespace ButterflyDreamUtility.AsyncTween
+namespace ButterflyDreamUtility.UniTaskTween
 {
     /// <summary>
     /// トゥイーターの基底インターフェイス

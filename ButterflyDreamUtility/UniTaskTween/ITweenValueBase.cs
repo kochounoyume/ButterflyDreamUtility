@@ -1,4 +1,4 @@
-namespace ButterflyDreamUtility.AsyncTween
+namespace ButterflyDreamUtility.UniTaskTween
 {
     /// <summary>
     /// トゥイーターの基底インターフェイス
