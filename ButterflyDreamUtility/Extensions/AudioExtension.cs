@@ -80,7 +80,7 @@ namespace ButterflyDreamUtility.Extensions
         /// <param name="duration">フェード時間</param>
         /// <param name="isIgnoreTimeScale">Time.timeScaleを無視するかどうか</param>
         /// <returns>フェードデータセット</returns>
-        private static TweenDataSet<FloatTween> SetFadeTween(this AudioSource target, float endValue, float duration, bool isIgnoreTimeScale = false)
+        private static TweenDataSet<FloatTween> SetFadeTween(AudioSource target, float endValue, float duration, bool isIgnoreTimeScale = false)
         {
             if (target == null) return default;
             
