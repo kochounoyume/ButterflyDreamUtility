@@ -66,6 +66,7 @@ namespace ButterflyDreamUtility.UniTaskTween
             {
                 elapsedTime += tweenInfo.isIgnoreTimeScale ? Time.unscaledDeltaTime : Time.deltaTime;
                 tweenInfo.TweenValue(Mathf.Clamp01(elapsedTime / tweenInfo.duration));
+                // UniTask.Yieldを使うと、Time.unscaledDeltaTime使用時の挙動がおかしくなるのでUniTask.DelayFrameを使用
                 await UniTask.DelayFrame(1, PlayerLoopTiming.Update, cancellationToken);
             }
             tweenInfo.TweenValue(1.0f);
@@ -112,7 +113,7 @@ namespace ButterflyDreamUtility.UniTaskTween
         // Disposeが呼ばれるのは、トゥイーン完全終了時と、次のトゥイーンを上書きせず即中断するときのみのはず
         public void Dispose()
         {
-            
+            cancellationTokenSource?.Dispose();
         }
     }
 }
