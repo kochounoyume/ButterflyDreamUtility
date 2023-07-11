@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Threading;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 
@@ -65,11 +66,12 @@ namespace ButterflyDreamUtility.Extensions
         /// <param name="endValue">フェード後の音量</param>
         /// <param name="duration">フェード時間</param>
         /// <param name="isIgnoreTimeScale">Time.timeScaleを無視するかどうか</param>
-        public static async UniTask FadeTweenAsync(this AudioSource target, float endValue, float duration, bool isIgnoreTimeScale = false)
+        /// <param name="token">キャンセルトークン（敢えて指定しなくても、AudioSource破壊時にキャンセルはされる）</param>
+        public static async UniTask FadeTweenAsync(this AudioSource target, float endValue, float duration, bool isIgnoreTimeScale = false, CancellationToken token = default)
         {
             TweenDataSet<FloatTween> dataSet = SetFadeTween(target, endValue, duration, isIgnoreTimeScale);
             if(dataSet.Equals(default)) return;
-            await volumeTweenRunnerTable[dataSet.instanceId].StartTweenAsync(dataSet.tweenValue);
+            await volumeTweenRunnerTable[dataSet.instanceId].StartTweenAsync(dataSet.tweenValue, token);
         }
 
         /// <summary>

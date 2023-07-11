@@ -80,7 +80,10 @@ namespace ButterflyDreamUtility.UniTaskTween
         /// <param name="info">トゥイーン構造体</param>
         public void StartTween(T info)
         {
-            cancellationTokenSource ??= destroyToken != CancellationToken.None ? CancellationTokenSource.CreateLinkedTokenSource(destroyToken) : new CancellationTokenSource();
+            cancellationTokenSource ??= 
+                destroyToken != CancellationToken.None 
+                    ? CancellationTokenSource.CreateLinkedTokenSource(new CancellationToken[]{destroyToken})
+                    : new CancellationTokenSource();
             // 投げっぱなしでトゥイーン開始
             AsyncDoTween(info, cancellationTokenSource.Token).Forget();
         }
@@ -89,10 +92,23 @@ namespace ButterflyDreamUtility.UniTaskTween
         /// トゥイーン開始処理
         /// </summary>
         /// <param name="info">トゥイーン構造体</param>
-        public async UniTask StartTweenAsync(T info)
+        /// <param name="setToken">外部からセットしたキャンセルトークン</param>
+        public async UniTask StartTweenAsync(T info, CancellationToken setToken = default)
         {
-            cancellationTokenSource ??= destroyToken != CancellationToken.None ? CancellationTokenSource.CreateLinkedTokenSource(destroyToken) : new CancellationTokenSource();
-            await AsyncDoTween(info, cancellationTokenSource.Token);
+            cancellationTokenSource ??= 
+                destroyToken != CancellationToken.None
+                    ? CancellationTokenSource.CreateLinkedTokenSource(new CancellationToken[]{destroyToken, setToken}) 
+                    : CancellationTokenSource.CreateLinkedTokenSource(new CancellationToken[]{setToken});
+            await AsyncDoTween(info, cancellationTokenSource.Token)
+                .SuppressCancellationThrow()
+                .ContinueWith(isCanceled =>
+                {
+                    if (!isCanceled) return;
+                    // 使いまわすためいろいろリセットするだけにする
+                    cancellationTokenSource.Dispose();
+                    cancellationTokenSource = null;
+                    onTweenFinished = null;
+                });
         }
 
         /// <summary>
@@ -114,6 +130,8 @@ namespace ButterflyDreamUtility.UniTaskTween
         public void Dispose()
         {
             cancellationTokenSource?.Dispose();
+            cancellationTokenSource = null;
+            onTweenFinished = null;
         }
     }
 }
