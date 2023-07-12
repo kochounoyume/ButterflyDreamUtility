@@ -7,7 +7,7 @@ namespace ButterflyDreamUtility.UniTaskTween
     /// <summary>
     /// Color型のトゥイーン構造体
     /// </summary>
-    public struct ColorTween : IEquatable<ColorTween>, ITweenValue<Color>
+    internal struct ColorTween : IEquatable<ColorTween>, ITweenValue<Color>
     {
         public enum ColorTweenMode
         {

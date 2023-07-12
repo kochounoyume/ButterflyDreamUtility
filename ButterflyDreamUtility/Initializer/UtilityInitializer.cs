@@ -7,7 +7,7 @@ namespace ButterflyDreamUtility.Initializer
     /// <summary>
     /// Utilityの初期化処理クラス
     /// </summary>
-    internal sealed class UtilityInitializer : ScriptableObject
+    internal sealed class UtilityInitializer
     {
         /// <summary>
         /// Utilityの初期化処理

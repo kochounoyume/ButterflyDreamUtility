@@ -89,17 +89,19 @@ namespace ButterflyDreamUtility.UniTaskTween
         }
         
         /// <summary>
-        /// トゥイーン開始処理
+        /// トゥイーン開始処理を返す
         /// </summary>
         /// <param name="info">トゥイーン構造体</param>
         /// <param name="setToken">外部からセットしたキャンセルトークン</param>
-        public async UniTask StartTweenAsync(T info, CancellationToken setToken = default)
+        /// <returns>トゥイーン開始処理</returns>
+        public UniTask StartTweenAsync(T info, CancellationToken setToken = default)
         {
             cancellationTokenSource ??= 
                 destroyToken != CancellationToken.None
                     ? CancellationTokenSource.CreateLinkedTokenSource(new CancellationToken[]{destroyToken, setToken}) 
                     : CancellationTokenSource.CreateLinkedTokenSource(new CancellationToken[]{setToken});
-            await AsyncDoTween(info, cancellationTokenSource.Token)
+
+            return AsyncDoTween(info, cancellationTokenSource.Token)
                 .SuppressCancellationThrow()
                 .ContinueWith(isCanceled =>
                 {
