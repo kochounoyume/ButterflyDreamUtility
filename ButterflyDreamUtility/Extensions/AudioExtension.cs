@@ -60,18 +60,18 @@ namespace ButterflyDreamUtility.Extensions
         }
 
         /// <summary>
-        /// AudioSourceの音量を非同期でフェードする
+        /// AudioSourceの音量を非同期でフェードするUniTaskを返す
         /// </summary>
         /// <param name="target">AudioSource</param>
         /// <param name="endValue">フェード後の音量</param>
         /// <param name="duration">フェード時間</param>
         /// <param name="isIgnoreTimeScale">Time.timeScaleを無視するかどうか</param>
         /// <param name="token">キャンセルトークン（敢えて指定しなくても、AudioSource破壊時にキャンセルはされる）</param>
-        public static async UniTask FadeTweenAsync(this AudioSource target, float endValue, float duration, bool isIgnoreTimeScale = false, CancellationToken token = default)
+        /// <returns>AudioSourceの音量をフェードする非同期処理</returns>
+        public static UniTask FadeTweenAsync(this AudioSource target, float endValue, float duration, bool isIgnoreTimeScale = false, CancellationToken token = default)
         {
             TweenDataSet<FloatTween> dataSet = SetFadeTween(target, endValue, duration, isIgnoreTimeScale);
-            if(dataSet.Equals(default)) return;
-            await volumeTweenRunnerTable[dataSet.instanceId].StartTweenAsync(dataSet.tweenValue, token);
+            return dataSet.Equals(default) ? default : volumeTweenRunnerTable[dataSet.instanceId].StartTweenAsync(dataSet.tweenValue, token);
         }
 
         /// <summary>
