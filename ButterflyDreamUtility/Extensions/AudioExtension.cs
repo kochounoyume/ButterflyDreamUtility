@@ -52,10 +52,10 @@ namespace ButterflyDreamUtility.Extensions
         /// <param name="endValue">フェード後の音量</param>
         /// <param name="duration">フェード時間</param>
         /// <param name="isIgnoreTimeScale">Time.timeScaleを無視するかどうか</param>
-        /// <param name="isFadeout">フェードアウトするか否か　フェードアウトする場合はトゥイーン後自動で再生を停止する</param>
-        public static void FadeTween(this AudioSource target, float endValue, float duration, bool isIgnoreTimeScale = false, bool isFadeout = false)
+        /// <param name="callback">フェード完了後のコールバック</param>
+        public static void FadeTween(this AudioSource target, float endValue, float duration, bool isIgnoreTimeScale = false, UnityAction<AudioSource> callback = null)
         {
-            TweenDataSet<FloatTween> dataSet = SetFadeTween(target, endValue, duration, isIgnoreTimeScale, isFadeout ? target.Stop : null);
+            TweenDataSet<FloatTween> dataSet = SetFadeTween(target, endValue, duration, isIgnoreTimeScale, callback);
             if(dataSet.Equals(default)) return;
             volumeTweenRunnerTable[dataSet.instanceId].StartTween(dataSet.tweenValue);
         }
@@ -84,7 +84,7 @@ namespace ButterflyDreamUtility.Extensions
         /// <param name="isIgnoreTimeScale">Time.timeScaleを無視するかどうか</param>
         /// <param name="callback">フェード完了後のコールバック</param>
         /// <returns>フェードデータセット</returns>
-        private static TweenDataSet<FloatTween> SetFadeTween(AudioSource target, float endValue, float duration, bool isIgnoreTimeScale = false, UnityAction callback = null)
+        private static TweenDataSet<FloatTween> SetFadeTween(AudioSource target, float endValue, float duration, bool isIgnoreTimeScale = false, UnityAction<AudioSource> callback = null)
         {
             if (target == null) return default;
             
@@ -119,7 +119,7 @@ namespace ButterflyDreamUtility.Extensions
             // コールバックがあれば登録する
             if (callback != null)
             {
-                volumeTweenRunnerTable[id].onTweenFinished += _ => callback.Invoke();
+                volumeTweenRunnerTable[id].onTweenFinished += _ => callback.Invoke(target);
             }
             volumeTweenRunnerTable[id].onTweenFinished += instanceID =>
             {
