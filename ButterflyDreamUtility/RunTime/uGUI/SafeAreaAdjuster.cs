@@ -8,21 +8,13 @@ namespace ButterflyDreamUtility.uGUI
     /// DeviceSimulatorにも対応済
     /// </remarks>
     /// </summary>
-    [RequireComponent(typeof(RectTransform))]
-    [ExecuteAlways]
+    [ExecuteAlways, RequireComponent(typeof(RectTransform))]
     public sealed class SafeAreaAdjuster : MonoBehaviour
     {
-#if UNITY_EDITOR
-        private bool isAdjusted = false;
-#endif
         private void Start() => Padding();
 
         private void Padding()
         {
-#if UNITY_EDITOR
-            if(Application.isPlaying && isAdjusted) return;
-            isAdjusted = true;
-#endif
             RectTransform rectTransform = GetComponent<RectTransform>();
             Rect safeArea = Screen.safeArea;
             Vector2 screenSize = new Vector2(Screen.width, Screen.height);
@@ -32,7 +24,17 @@ namespace ButterflyDreamUtility.uGUI
         }
     
 #if UNITY_EDITOR
-        private void Update() => Padding();
+        private bool isAdjusted = false;
+        
+        private void Update()
+        {
+            if(Application.isPlaying && isAdjusted)
+            {
+                isAdjusted = true;
+                return;
+            }
+            Padding();
+        }
 #endif
     }
 }
