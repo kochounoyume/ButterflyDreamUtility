@@ -95,6 +95,22 @@ namespace ButterflyDreamUtility.Constants
         public static Color32 clear
         {
             [MethodImpl((MethodImplOptions) 256)] get => new Color32(0, 0, 0, 0);
-        } 
+        }
+        
+        /// <summary>
+        /// <para>オレンジ. 独自設定色でRGBAは(255, 165, 0 255).</para>>
+        /// </summary>
+        public static Color32 orange
+        {
+            [MethodImpl((MethodImplOptions) 256)] get => new Color32(255, 165, 0, 255);
+        }
+        
+        /// <summary>
+        /// <para>ライトグリーン. 独自設定色でRGBAは(188, 255, 0, 255).</para>>
+        /// </summary>
+        public static Color32 lightGreen
+        {
+            [MethodImpl((MethodImplOptions) 256)] get => new Color32(188, 255, 0, 255);
+        }
     }
 }
