@@ -22,7 +22,7 @@ namespace ButterflyDreamUtility.uGUI
         
         private readonly TimeSpan pingTimeout = TimeSpan.FromSeconds(0.5);
 
-        private async UniTask Start()
+        private async UniTaskVoid Start()
         {
             textMeshProUGUI = GetComponent<TextMeshProUGUI>();
             while (true)

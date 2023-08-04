@@ -21,7 +21,7 @@ namespace ButterflyDreamUtility.Debug
 
         private StringBuilder sb = new StringBuilder();
 
-        private async UniTask Start()
+        private async UniTaskVoid Start()
         {
             FrameTiming[] frameTimings = new FrameTiming[1];
 
