@@ -14,7 +14,7 @@ namespace ButterflyDreamUtility.Debug
     internal sealed class DebugProfiler : MonoBehaviour
     {
         [SerializeField, Tooltip("表示する総メモリ使用量の単位")]
-        private MemoryUnit memoryUnit = MemoryUnit.GigaByte;
+        private MemoryUnit memoryUnit = MemoryUnit.GB;
         
         /// <summary>
         /// プロファイル情報を表示する際の表示領域(セーフエリアを考慮)
@@ -41,10 +41,10 @@ namespace ButterflyDreamUtility.Debug
         /// </summary>
         private enum MemoryUnit
         {
-            Byte = 0,
-            KiloByte = 1,
-            MegaByte = 2,
-            GigaByte = 3
+            B = 0,
+            KB = 1,
+            MB = 2,
+            GB = 3
         }
 
         private async UniTaskVoid Start()
@@ -80,10 +80,10 @@ namespace ButterflyDreamUtility.Debug
                         .Append(totalMemory.ToString("F"))
                         .Append(memoryUnit switch
                         {
-                            MemoryUnit.Byte => "B",
-                            MemoryUnit.KiloByte => "KB",
-                            MemoryUnit.MegaByte => "MB",
-                            MemoryUnit.GigaByte => "GB",
+                            MemoryUnit.B => "B",
+                            MemoryUnit.KB => "KB",
+                            MemoryUnit.MB => "MB",
+                            MemoryUnit.GB => "GB",
                             _ => "GB" // ここには来ない
                         });
                 }
