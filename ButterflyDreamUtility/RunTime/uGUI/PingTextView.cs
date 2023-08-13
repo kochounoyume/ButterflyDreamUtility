@@ -58,7 +58,7 @@ namespace ButterflyDreamUtility.uGUI
                             _ => ConstantColor32.magenta
                         };
                     }
-                    catch (TimeoutException e)
+                    catch (TimeoutException _)
                     {
                         // タイムアウトしてたら、非常にひどいラグを予想される数値でも表示しておく
                         textMeshProUGUI.SetText(PING_FORMAT, 500);
