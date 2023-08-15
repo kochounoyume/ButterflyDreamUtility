@@ -15,7 +15,7 @@ namespace ButterflyDreamUtility.UniTaskTween
         /// <summary>
         /// トゥイーンのキャンセルトークンソース
         /// </summary>
-        private CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
+        private CancellationTokenSource cancellationTokenSource = null;
         
         /// <summary>
         /// 対象のコンポーネントの破棄時のキャンセルトークン
@@ -101,16 +101,25 @@ namespace ButterflyDreamUtility.UniTaskTween
                     ? CancellationTokenSource.CreateLinkedTokenSource(new CancellationToken[]{destroyToken, setToken}) 
                     : CancellationTokenSource.CreateLinkedTokenSource(new CancellationToken[]{setToken});
 
-            return AsyncDoTween(info, cancellationTokenSource.Token)
-                .SuppressCancellationThrow()
-                .ContinueWith(isCanceled =>
+            var cancellationToken = cancellationTokenSource.Token;
+            // キャンセルした際の処理登録
+            cancellationToken.Register(() =>
+            {
+                // 使いまわすためいろいろリセットするだけにする
+                cancellationTokenSource.Dispose();
+                cancellationTokenSource = null;
+                // 破壊処理がなされていてのキャンセルの場合、終了処理をかまさないといけない（でないとDisposeするタイミングを失う）
+                if (destroyToken != CancellationToken.None && destroyToken.IsCancellationRequested)
                 {
-                    if (!isCanceled) return;
-                    // 使いまわすためいろいろリセットするだけにする
-                    cancellationTokenSource.Dispose();
-                    cancellationTokenSource = null;
+                    onTweenFinished?.Invoke(instanceId);
+                }
+                else
+                {
                     onTweenFinished = null;
-                });
+                }
+            });
+
+            return AsyncDoTween(info, cancellationToken);
         }
 
         /// <summary>

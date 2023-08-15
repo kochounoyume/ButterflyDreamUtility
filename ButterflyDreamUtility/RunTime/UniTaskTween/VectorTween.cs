@@ -5,28 +5,32 @@ using UnityEngine.Events;
 namespace ButterflyDreamUtility.UniTaskTween
 {
     /// <summary>
-    /// Color型のトゥイーン種類
+    /// Vector3型のトゥイーン種類
     /// </summary>
-    internal enum ColorTweenMode
+    internal enum VectorTweenMode
     {
-        All,
-        RGB,
-        Alpha
+        XYZ,
+        XY,
+        XZ,
+        YZ,
+        X,
+        Y,
+        Z
     }
     
     /// <summary>
-    /// Color型のトゥイーン構造体
+    /// Vector3型のトゥイーン構造体
     /// </summary>
-    internal struct ColorTween : IEquatable<ColorTween>, ITweenValue<Color>
+    internal struct VectorTween : IEquatable<VectorTween>, ITweenValue<Vector3>
     {
         /// <inheritdoc />
-        public event UnityAction<Color> onTweenChanged;
+        public event UnityAction<Vector3> onTweenChanged;
 
         /// <inheritdoc />
-        public Color startValue { get; }
+        public Vector3 startValue { get; }
         
         /// <inheritdoc />
-        public Color targetValue { get; }
+        public Vector3 targetValue { get; }
 
         /// <inheritdoc />
         public float duration { get; }
@@ -37,7 +41,7 @@ namespace ButterflyDreamUtility.UniTaskTween
         /// <summary>
         /// トゥイーンのモード
         /// </summary>
-        private ColorTweenMode tweenMode { get; }
+        private VectorTweenMode tweenMode { get; }
         
         /// <summary>
         /// コンストラクタ
@@ -47,7 +51,7 @@ namespace ButterflyDreamUtility.UniTaskTween
         /// <param name="targetValue">終了値</param>
         /// <param name="duration">トゥイーンの持続時間</param>
         /// <param name="isIgnoreTimeScale">Time.timeScaleを無視するかどうか</param>
-        public ColorTween(ColorTweenMode tweenMode, Color startValue, Color targetValue, float duration, bool isIgnoreTimeScale)
+        public VectorTween(VectorTweenMode tweenMode, Vector3 startValue, Vector3 targetValue, float duration, bool isIgnoreTimeScale)
         {
             this.tweenMode = tweenMode;
             this.startValue = startValue;
@@ -62,30 +66,43 @@ namespace ButterflyDreamUtility.UniTaskTween
         {
             if (onTweenChanged == null) return;
             
-            var newColor = Color.Lerp(startValue, targetValue, floatPercentage);
+            var newVector = Vector3.Lerp(startValue, targetValue, floatPercentage);
 
             switch (tweenMode)
             {
-                case ColorTweenMode.Alpha:
-                    newColor.r = startValue.r;
-                    newColor.g = startValue.g;
-                    newColor.b = startValue.b;
+                case VectorTweenMode.XYZ:
                     break;
-                case ColorTweenMode.RGB:
-                    newColor.a = startValue.a;
+                case VectorTweenMode.XY:
+                    newVector.z = startValue.z;
                     break;
-                case ColorTweenMode.All:
+                case VectorTweenMode.XZ:
+                    newVector.y = startValue.y;
+                    break;
+                case VectorTweenMode.YZ:
+                    newVector.x = startValue.x;
+                    break;
+                case VectorTweenMode.X:
+                    newVector.y = startValue.y;
+                    newVector.z = startValue.z;
+                    break;
+                case VectorTweenMode.Y:
+                    newVector.x = startValue.x;
+                    newVector.z = startValue.z;
+                    break;
+                case VectorTweenMode.Z:
+                    newVector.x = startValue.x;
+                    newVector.y = startValue.y;
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
             }
-            onTweenChanged.Invoke(newColor);
+            onTweenChanged.Invoke(newVector);
         }
 
         /// <inheritdoc />
         public bool IsValidTarget() => onTweenChanged != null;
 
-        public bool Equals(ColorTween other) 
+        public bool Equals(VectorTween other) 
             => startValue == other.startValue
                && targetValue == other.targetValue
                && Mathf.Approximately(duration, other.duration)
