@@ -131,7 +131,7 @@ namespace ButterflyDreamUtility.Extensions
         }
         
         /// <summary>
-        /// AudioSourceの音量をフェードを停止する
+        /// AudioSourceの音量のフェードを停止する
         /// </summary>
         /// <param name="target">AudioSource</param>
         public static void FadeStopTween(this AudioSource target)
