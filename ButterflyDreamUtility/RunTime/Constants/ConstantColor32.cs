@@ -6,7 +6,7 @@ namespace ButterflyDreamUtility.Constants
     /// <summary>
     /// Color32型の定数定義クラス
     /// </summary>
-    public sealed class ConstantColor32
+    public static class ConstantColor32
     {
         /// <summary>
         /// <para>赤単色. RGBAは(255, 0, 0, 255).</para>
@@ -96,7 +96,7 @@ namespace ButterflyDreamUtility.Constants
         {
             [MethodImpl((MethodImplOptions) 256)] get => new Color32(0, 0, 0, 0);
         }
-        
+
         /// <summary>
         /// <para>オレンジ. 独自設定色でRGBAは(255, 165, 0 255).</para>>
         /// </summary>
@@ -104,7 +104,7 @@ namespace ButterflyDreamUtility.Constants
         {
             [MethodImpl((MethodImplOptions) 256)] get => new Color32(255, 165, 0, 255);
         }
-        
+
         /// <summary>
         /// <para>ライトグリーン. 独自設定色でRGBAは(188, 255, 0, 255).</para>>
         /// </summary>
