@@ -1,8 +1,8 @@
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
-using UnityEngine.Events;
 
 namespace ButterflyDreamUtility.Extensions
 {
@@ -20,7 +20,7 @@ namespace ButterflyDreamUtility.Extensions
         /// using System.Collections;
         /// using UnityEngine;
         /// using ButterflyDreamUtility.Extension;
-        /// 
+        ///
         /// [RequireComponent(typeof(AudioSource))]
         /// public class Test : MonoBehaviour
         /// {
@@ -29,17 +29,17 @@ namespace ButterflyDreamUtility.Extensions
         ///         AudioSource audioSource = GetComponent<AudioSource>();
         ///         audioSource.volume = 0;
         ///         audioSource.Play();
-        /// 
+        ///
         ///         // 音量をフェードインする
         ///         audioSource.FadeTween(1, 1.0f);
-        /// 
+        ///
         ///         yield return new WaitForSeconds(0.5f);
-        /// 
+        ///
         ///         // 音量をフェードアウトする（前のTweenは自動的に停止）
         ///         audioSource.FadeTween(0, 1.0f);
-        /// 
+        ///
         ///         yield return new WaitForSeconds(0.5f);
-        /// 
+        ///
         ///         // フェードアウトをキャンセルする
         ///         audioSource.FadeStopTween();
         ///     }
@@ -53,7 +53,7 @@ namespace ButterflyDreamUtility.Extensions
         /// <param name="duration">フェード時間</param>
         /// <param name="isIgnoreTimeScale">Time.timeScaleを無視するかどうか</param>
         /// <param name="callback">フェード完了後のコールバック</param>
-        public static void FadeTween(this AudioSource target, float endValue, float duration, bool isIgnoreTimeScale = false, UnityAction<AudioSource> callback = null)
+        public static void FadeTween(this AudioSource target, float endValue, float duration, bool isIgnoreTimeScale = false, Action<AudioSource> callback = null)
         {
             TweenDataSet<FloatTween> dataSet = SetFadeTween(target, endValue, duration, isIgnoreTimeScale, callback);
             if(dataSet.Equals(default)) return;
@@ -84,10 +84,10 @@ namespace ButterflyDreamUtility.Extensions
         /// <param name="isIgnoreTimeScale">Time.timeScaleを無視するかどうか</param>
         /// <param name="callback">フェード完了後のコールバック</param>
         /// <returns>フェードデータセット</returns>
-        private static TweenDataSet<FloatTween> SetFadeTween(AudioSource target, float endValue, float duration, bool isIgnoreTimeScale = false, UnityAction<AudioSource> callback = null)
+        private static TweenDataSet<FloatTween> SetFadeTween(AudioSource target, float endValue, float duration, bool isIgnoreTimeScale = false, Action<AudioSource> callback = null)
         {
             if (target == null) return default;
-            
+
             int id = target.GetInstanceID();
             bool isBeforeTableContain = volumeTweenRunnerTable != null && volumeTweenRunnerTable.ContainsKey(id);
 
@@ -115,7 +115,7 @@ namespace ButterflyDreamUtility.Extensions
                 volumeTweenRunnerTable ??= new Dictionary<int, TweenRunner<FloatTween>>(1);
                 volumeTweenRunnerTable.Add(id, new TweenRunner<FloatTween>(target , id));
             }
-            
+
             // コールバックがあれば登録する
             if (callback != null)
             {
@@ -129,7 +129,7 @@ namespace ButterflyDreamUtility.Extensions
 
             return new TweenDataSet<FloatTween>(floatTween, id);
         }
-        
+
         /// <summary>
         /// AudioSourceの音量のフェードを停止する
         /// </summary>
@@ -137,7 +137,7 @@ namespace ButterflyDreamUtility.Extensions
         public static void FadeStopTween(this AudioSource target)
         {
             if (target == null) return;
-            
+
             int id = target.GetInstanceID();
 
             // 前回のフェードをキャンセルする
