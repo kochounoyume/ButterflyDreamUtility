@@ -1,4 +1,4 @@
-using System.Text;
+using Cysharp.Text;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Profiling;
@@ -15,27 +15,27 @@ namespace ButterflyDreamUtility.Debug
     {
         [SerializeField, Tooltip("表示する総メモリ使用量の単位")]
         private MemoryUnit memoryUnit = MemoryUnit.GB;
-        
+
         /// <summary>
         /// プロファイル情報を表示する際の表示領域(セーフエリアを考慮)
         /// </summary>
         private Rect debugField = default;
-        
+
         /// <summary>
-        /// 表示するプロファイル情報を連結するためのStringBuilder
+        /// 次に表示するプロファイル情報テキスト
         /// </summary>
-        private readonly StringBuilder sb = new StringBuilder();
+        private string nextDebugText = string.Empty;
 
         /// <summary>
         /// プロファイル情報を更新する間隔
         /// </summary>
-        private const float updateInterval = 0.5f;
+        private const float UPDATE_INTERVAL = 0.5f;
 
         /// <summary>
         /// プロファイル情報を表示する際の文字の大きさ
         /// </summary>
-        private const int fontSize = 30;
-        
+        private const int FONT_SIZE = 30;
+
         /// <summary>
         /// 総メモリ使用量表示の単位指定列挙体
         /// </summary>
@@ -52,16 +52,15 @@ namespace ButterflyDreamUtility.Debug
             // セーフエリアを考慮した表示領域を取得
             Vector2 safeAreaStartPos = new Vector2(Screen.width, Screen.height) - Screen.safeArea.size - Screen.safeArea.position;
             debugField = new Rect(safeAreaStartPos, new Vector2(500, 80));
-            
+
             double lastInterval = Time.realtimeSinceStartup;
             int frames = 0;
-            var ctSToken = this.GetCancellationTokenOnDestroy();
 
             while (true)
             {
                 frames++;
                 float timeNow = Time.realtimeSinceStartup;
-                if (timeNow > lastInterval + updateInterval)
+                if (timeNow > lastInterval + UPDATE_INTERVAL)
                 {
                     float fps = (float)(frames / (timeNow - lastInterval));
                     frames = 0;
@@ -69,16 +68,16 @@ namespace ButterflyDreamUtility.Debug
                     // 確保している総メモリ
                     float totalMemory = Profiler.GetTotalReservedMemoryLong() / Mathf.Pow(1024f, (int) memoryUnit);
 
-                    sb.Clear();
-                    sb
-                        .Append("CPU: ")
-                        .Append(fps.ToString("F0"))
-                        .Append("fps (")
-                        .Append(timeNow.ToString("F1"))
-                        .AppendLine("ms)")
-                        .Append("Memory: ")
-                        .Append(totalMemory.ToString("F"))
-                        .Append(memoryUnit switch
+                    using (var sb = ZString.CreateStringBuilder(true))
+                    {
+                        sb.Append("CPU: ");
+                        sb.Append(fps.ToString("F0"));
+                        sb.Append("fps (");
+                        sb.Append(timeNow.ToString("F1"));
+                        sb.AppendLine("ms)");
+                        sb.Append("Memory: ");
+                        sb.Append(totalMemory.ToString("F"));
+                        sb.Append(memoryUnit switch
                         {
                             MemoryUnit.B => "B",
                             MemoryUnit.KB => "KB",
@@ -86,9 +85,11 @@ namespace ButterflyDreamUtility.Debug
                             MemoryUnit.GB => "GB",
                             _ => "GB" // ここには来ない
                         });
+                        nextDebugText = sb.ToString();
+                    }
                 }
 
-                await UniTask.Yield(PlayerLoopTiming.Update, ctSToken);
+                await UniTask.Yield(PlayerLoopTiming.Update, destroyCancellationToken);
             }
         }
 
@@ -96,14 +97,14 @@ namespace ButterflyDreamUtility.Debug
         {
             GUIStyle styleBox = new GUIStyle(GUI.skin.box)
             {
-                fontSize = fontSize,
+                fontSize = FONT_SIZE,
                 normal =
                 {
                     textColor = Color.white
                 },
                 alignment = TextAnchor.UpperLeft
             };
-            GUI.Box(debugField, sb.ToString(), styleBox);
+            GUI.Box(debugField, nextDebugText, styleBox);
         }
     }
 }
