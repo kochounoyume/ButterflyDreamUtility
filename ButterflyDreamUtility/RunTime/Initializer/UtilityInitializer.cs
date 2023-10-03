@@ -3,11 +3,11 @@ using UnityEngine;
 namespace ButterflyDreamUtility.Initializer
 {
     using Debug;
-    
+
     /// <summary>
     /// Utilityの初期化処理クラス
     /// </summary>
-    internal sealed class UtilityInitializer
+    internal static class UtilityInitializer
     {
         /// <summary>
         /// Utilityの初期化処理

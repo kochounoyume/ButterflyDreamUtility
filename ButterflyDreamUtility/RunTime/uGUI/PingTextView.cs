@@ -1,4 +1,5 @@
 ﻿using System;
+using Cysharp.Text;
 using Cysharp.Threading.Tasks;
 using TMPro;
 using UnityEngine;
@@ -6,20 +7,20 @@ using UnityEngine;
 namespace ButterflyDreamUtility.uGUI
 {
     using Constants;
-    
+
     /// <summary>
     /// Ping値を表示するビュークラス
     /// </summary>
     [RequireComponent(typeof(TextMeshProUGUI))]
-    public sealed class PingTextView : MonoBehaviour
+    internal sealed class PingTextView : MonoBehaviour
     {
         [SerializeField, Tooltip("Pingを取得するアドレス")]
         private string pingAddress = "8.8.8.8";
-        
+
         private TextMeshProUGUI textMeshProUGUI = null;
-        
+
         private const string PING_FORMAT = "{0}ms";
-        
+
         private readonly TimeSpan pingTimeout = TimeSpan.FromSeconds(0.5);
 
         private async UniTaskVoid Start()
@@ -38,10 +39,9 @@ namespace ButterflyDreamUtility.uGUI
                     try
                     {
                         Ping ping = new Ping(pingAddress);
-                        await UniTask.WaitUntil(() => ping.isDone,
-                                cancellationToken: this.GetCancellationTokenOnDestroy())
+                        await UniTask.WaitUntil(() => ping.isDone, cancellationToken: destroyCancellationToken)
                             .TimeoutWithoutException(pingTimeout);
-                        textMeshProUGUI.SetText(PING_FORMAT, ping.time);
+                        textMeshProUGUI.SetTextFormat(PING_FORMAT, ping.time);
                         textMeshProUGUI.color = ping.time switch
                         {
                             // 0ms ~ 30msは黄緑で"非常に快適"
@@ -61,7 +61,7 @@ namespace ButterflyDreamUtility.uGUI
                     catch (TimeoutException)
                     {
                         // タイムアウトしてたら、非常にひどいラグを予想される数値でも表示しておく
-                        textMeshProUGUI.SetText(PING_FORMAT, 500);
+                        textMeshProUGUI.SetTextFormat(PING_FORMAT, 500);
                         textMeshProUGUI.color = ConstantColor32.magenta;
                     }
                 }
@@ -70,7 +70,7 @@ namespace ButterflyDreamUtility.uGUI
                     textMeshProUGUI.text = "Not Networking";
                     textMeshProUGUI.color = ConstantColor32.red;
                 }
-                await UniTask.Delay(pingTimeout, cancellationToken: this.GetCancellationTokenOnDestroy());
+                await UniTask.Delay(pingTimeout, cancellationToken: destroyCancellationToken);
             }
         }
     }
