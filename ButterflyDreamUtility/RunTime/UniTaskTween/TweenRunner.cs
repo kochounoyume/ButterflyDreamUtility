@@ -2,7 +2,6 @@
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
-using UnityEngine.Events;
 
 namespace ButterflyDreamUtility.UniTaskTween
 {
@@ -16,7 +15,7 @@ namespace ButterflyDreamUtility.UniTaskTween
         /// トゥイーンのキャンセルトークンソース
         /// </summary>
         private CancellationTokenSource cancellationTokenSource = null;
-        
+
         /// <summary>
         /// 対象のコンポーネントの破棄時のキャンセルトークン
         /// </summary>
@@ -25,8 +24,8 @@ namespace ButterflyDreamUtility.UniTaskTween
         /// <summary>
         /// TokenSourceが無事終了したときに呼び出されるイベント
         /// </summary>
-        public event UnityAction<int> onTweenFinished = null;
-        
+        public event Action<int> onTweenFinished = null;
+
         /// <summary>
         /// コンポーネント拡張での使用時に終了イベント起動で必要なインスタンスid
         /// </summary>
@@ -60,7 +59,7 @@ namespace ButterflyDreamUtility.UniTaskTween
         private async UniTask AsyncDoTween(T tweenInfo, CancellationToken cancellationToken)
         {
             if (!tweenInfo.IsValidTarget()) return;
-            
+
             float elapsedTime = 0.0f;
             while (elapsedTime < tweenInfo.duration)
             {
@@ -80,14 +79,14 @@ namespace ButterflyDreamUtility.UniTaskTween
         /// <param name="info">トゥイーン構造体</param>
         public void StartTween(T info)
         {
-            cancellationTokenSource ??= 
-                destroyToken != CancellationToken.None 
+            cancellationTokenSource ??=
+                destroyToken != CancellationToken.None
                     ? CancellationTokenSource.CreateLinkedTokenSource(new CancellationToken[]{destroyToken})
                     : new CancellationTokenSource();
             // 投げっぱなしでトゥイーン開始
             AsyncDoTween(info, cancellationTokenSource.Token).Forget();
         }
-        
+
         /// <summary>
         /// トゥイーン開始処理を返す
         /// </summary>
@@ -96,9 +95,9 @@ namespace ButterflyDreamUtility.UniTaskTween
         /// <returns>トゥイーン開始処理</returns>
         public UniTask StartTweenAsync(T info, CancellationToken setToken = default)
         {
-            cancellationTokenSource ??= 
+            cancellationTokenSource ??=
                 destroyToken != CancellationToken.None
-                    ? CancellationTokenSource.CreateLinkedTokenSource(new CancellationToken[]{destroyToken, setToken}) 
+                    ? CancellationTokenSource.CreateLinkedTokenSource(new CancellationToken[]{destroyToken, setToken})
                     : CancellationTokenSource.CreateLinkedTokenSource(new CancellationToken[]{setToken});
 
             var cancellationToken = cancellationTokenSource.Token;

@@ -1,5 +1,4 @@
 ﻿using System;
-using UnityEngine.Events;
 
 namespace ButterflyDreamUtility.UniTaskTween
 {
@@ -15,13 +14,13 @@ namespace ButterflyDreamUtility.UniTaskTween
         /// <summary>
         /// トゥイーンする処理
         /// </summary>
-        event UnityAction<T> onTweenChanged;
-        
+        event Action<T> onTweenChanged;
+
         /// <summary>
         /// トゥイーンの開始値
         /// </summary>
         T startValue { get; }
-        
+
         /// <summary>
         /// トゥイーンの終了値
         /// </summary>

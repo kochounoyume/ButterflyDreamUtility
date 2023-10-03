@@ -1,6 +1,5 @@
 ﻿using System;
 using UnityEngine;
-using UnityEngine.Events;
 
 namespace ButterflyDreamUtility.UniTaskTween
 {
@@ -10,20 +9,20 @@ namespace ButterflyDreamUtility.UniTaskTween
     internal struct FloatTween : IEquatable<FloatTween>, ITweenValue<float>
     {
         /// <inheritdoc />
-        public event UnityAction<float> onTweenChanged;
+        public event Action<float> onTweenChanged;
 
         /// <inheritdoc />
         public float startValue { get; }
-        
+
         /// <inheritdoc />
         public float targetValue { get; }
-        
+
         /// <inheritdoc />
         public float duration { get; }
-        
+
         /// <inheritdoc />
         public bool isIgnoreTimeScale { get; }
-        
+
         /// <summary>
         /// Float型のトゥイーン構造体のコンストラクタ
         /// </summary>
@@ -49,11 +48,11 @@ namespace ButterflyDreamUtility.UniTaskTween
         /// <inheritdoc />
         public bool IsValidTarget() => onTweenChanged != null;
 
-        public bool Equals(FloatTween other) 
+        public bool Equals(FloatTween other)
             => Mathf.Approximately(startValue, other.startValue)
                && Mathf.Approximately(targetValue, other.targetValue)
                && Mathf.Approximately(duration, other.duration)
-               && isIgnoreTimeScale == other.isIgnoreTimeScale 
+               && isIgnoreTimeScale == other.isIgnoreTimeScale
                && onTweenChanged == other.onTweenChanged;
 
         public override bool Equals(object obj) => obj is FloatTween other && Equals(other);

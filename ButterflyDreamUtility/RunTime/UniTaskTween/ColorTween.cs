@@ -1,6 +1,5 @@
 ﻿using System;
 using UnityEngine;
-using UnityEngine.Events;
 
 namespace ButterflyDreamUtility.UniTaskTween
 {
@@ -13,32 +12,32 @@ namespace ButterflyDreamUtility.UniTaskTween
         RGB,
         Alpha
     }
-    
+
     /// <summary>
     /// Color型のトゥイーン構造体
     /// </summary>
     internal struct ColorTween : IEquatable<ColorTween>, ITweenValue<Color>
     {
         /// <inheritdoc />
-        public event UnityAction<Color> onTweenChanged;
+        public event Action<Color> onTweenChanged;
 
         /// <inheritdoc />
         public Color startValue { get; }
-        
+
         /// <inheritdoc />
         public Color targetValue { get; }
 
         /// <inheritdoc />
         public float duration { get; }
-        
+
         /// <inheritdoc />
         public bool isIgnoreTimeScale { get; }
-        
+
         /// <summary>
         /// トゥイーンのモード
         /// </summary>
         private ColorTweenMode tweenMode { get; }
-        
+
         /// <summary>
         /// コンストラクタ
         /// </summary>
@@ -61,7 +60,7 @@ namespace ButterflyDreamUtility.UniTaskTween
         public void TweenValue(float floatPercentage)
         {
             if (onTweenChanged == null) return;
-            
+
             var newColor = Color.Lerp(startValue, targetValue, floatPercentage);
 
             switch (tweenMode)
@@ -85,12 +84,12 @@ namespace ButterflyDreamUtility.UniTaskTween
         /// <inheritdoc />
         public bool IsValidTarget() => onTweenChanged != null;
 
-        public bool Equals(ColorTween other) 
+        public bool Equals(ColorTween other)
             => startValue == other.startValue
                && targetValue == other.targetValue
                && Mathf.Approximately(duration, other.duration)
-               && isIgnoreTimeScale == other.isIgnoreTimeScale 
-               && tweenMode == other.tweenMode 
+               && isIgnoreTimeScale == other.isIgnoreTimeScale
+               && tweenMode == other.tweenMode
                && onTweenChanged == other.onTweenChanged;
 
         public override bool Equals(object obj) => obj is ColorTween other && Equals(other);
