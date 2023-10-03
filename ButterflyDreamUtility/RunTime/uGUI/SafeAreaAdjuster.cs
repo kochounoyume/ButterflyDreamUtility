@@ -9,7 +9,7 @@ namespace ButterflyDreamUtility.uGUI
     /// </remarks>
     /// </summary>
     [ExecuteAlways, RequireComponent(typeof(RectTransform))]
-    public sealed class SafeAreaAdjuster : MonoBehaviour
+    internal sealed class SafeAreaAdjuster : MonoBehaviour
     {
         private void Start() => Padding();
 
@@ -18,14 +18,14 @@ namespace ButterflyDreamUtility.uGUI
             RectTransform rectTransform = GetComponent<RectTransform>();
             Rect safeArea = Screen.safeArea;
             Vector2 screenSize = new Vector2(Screen.width, Screen.height);
-        
+
             rectTransform.anchorMin = safeArea.min / screenSize;
             rectTransform.anchorMax = safeArea.max / screenSize;
         }
-    
+
 #if UNITY_EDITOR
         private bool isAdjusted = false;
-        
+
         private void Update()
         {
             if(Application.isPlaying && isAdjusted)

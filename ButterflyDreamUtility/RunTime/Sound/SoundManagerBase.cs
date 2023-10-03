@@ -9,7 +9,7 @@ using Random = UnityEngine.Random;
 namespace ButterflyDreamUtility.Sound
 {
     using Extensions;
-    
+
     /// <summary>
     /// ゲーム内の音楽再生を管理する基底クラス
     /// </summary>
@@ -34,12 +34,12 @@ namespace ButterflyDreamUtility.Sound
         /// AudioSourceがアタッチされたゲームオブジェクト名
         /// </summary>
         private const string OBJECT_NAME = "SoundManager";
-        
+
         /// <summary>
         /// BGMのチャンネル数
         /// </summary>
         private const int BGM_CHANNEL = 4;
-        
+
         /// <summary>
         /// マスターボリュームを管理するAudioMixerGroup名
         /// </summary>
@@ -49,37 +49,37 @@ namespace ButterflyDreamUtility.Sound
         /// BGMのボリュームを管理するAudioMixerGroup名
         /// </summary>
         private const string BGM_GROUP_NAME = "BGM";
-        
+
         /// <summary>
         /// SEのボリュームを管理するAudioMixerGroup名
         /// </summary>
         private const string SE_GROUP_NAME = "SE";
-        
+
         /// <summary>
         /// ボイスのボリュームを管理するAudioMixerGroup名
         /// </summary>
         private const string VOICE_GROUP_NAME = "Voice";
-        
+
         /// <summary>
         /// フェード時間定数
         /// </summary>
         private const float BGM_FADE_TIME = 5.0f;
-        
+
         /// <summary>
         /// オーディオミキサー
         /// </summary>
         private readonly AudioMixer audioMixer = null;
-        
+
         /// <summary>
         /// BGM用のAudioSourceチャンネル配列
         /// </summary>
         private readonly AudioSource[] bgmAudioSources = null;
-        
+
         /// <summary>
         /// SE用のAudioSourceチャンネル
         /// </summary>
         private readonly AudioSource seAudioSource = null;
-        
+
         /// <summary>
         /// ボイス用のAudioSourceチャンネル
         /// </summary>
@@ -92,7 +92,7 @@ namespace ButterflyDreamUtility.Sound
         /// BGM用のキャンセルトークンソース
         /// </summary>
         private CancellationTokenSource bgmCancellationTokenSource = null;
-        
+
         /// <summary>
         /// 現在再生中のBGMのAudioClip
         /// </summary>
@@ -101,7 +101,7 @@ namespace ButterflyDreamUtility.Sound
         public SoundManagerBase(AudioMixer audioMixer)
         {
             this.audioMixer = audioMixer;
-            
+
             const int amountChannel = BGM_CHANNEL + 2;
             Type[] components = new Type[amountChannel];
             for (int i = 0; i < amountChannel; i++)
@@ -109,17 +109,17 @@ namespace ButterflyDreamUtility.Sound
                 components[i] = typeof(AudioSource);
             }
             AudioSource[] audioSources = new GameObject(OBJECT_NAME, components).GetComponents<AudioSource>();
-            
+
             bgmAudioSources = new AudioSource[BGM_CHANNEL];
             Array.Copy(audioSources, bgmAudioSources, BGM_CHANNEL);
             foreach (var bgmAudioSource in bgmAudioSources)
             {
                 bgmAudioSource.outputAudioMixerGroup = audioMixer.FindMatchingGroups(BGM_GROUP_NAME)[0];
             }
-            
+
             seAudioSource = audioSources[amountChannel - 2];
             seAudioSource.outputAudioMixerGroup = audioMixer.FindMatchingGroups(SE_GROUP_NAME)[0];
-            
+
             voiceAudioSource = audioSources[amountChannel - 1];
             voiceAudioSource.outputAudioMixerGroup = audioMixer.FindMatchingGroups(VOICE_GROUP_NAME)[0];
         }
@@ -128,8 +128,8 @@ namespace ButterflyDreamUtility.Sound
         public void PlayBgm(
             AudioClip bgmAudioClip,
             float startTime = 0,　
-            bool isFadein = false, 
-            float duration = BGM_FADE_TIME, 
+            bool isFadein = false,
+            float duration = BGM_FADE_TIME,
             BgmLoopMode bgmLoopMode = BgmLoopMode.InteractiveLoop)
         {
             // 現在再生しているBGMと同じBGMを再生コールしようとしているときは何もしない
@@ -138,7 +138,7 @@ namespace ButterflyDreamUtility.Sound
             bgmCancellationTokenSource?.Cancel();
             bgmCancellationTokenSource?.Dispose();
             bgmCancellationTokenSource = null;
-            
+
             // インタラクティブループではない場合
             if (bgmLoopMode != BgmLoopMode.InteractiveLoop)
             {
@@ -152,7 +152,7 @@ namespace ButterflyDreamUtility.Sound
                         bgmAudioSource.volume = 1;
                     }
                 }
-                
+
                 AudioSource mainBgmChannel = bgmAudioSources[(int) BgmChannel.Main1];
                 mainBgmChannel.clip = bgmAudioClip;
                 mainBgmChannel.time = startTime % bgmAudioClip.length;
@@ -170,7 +170,7 @@ namespace ButterflyDreamUtility.Sound
 
             // インタラクティブループの場合；ループ処理にUniTask使うのでキャンセルトークン作成
             bgmCancellationTokenSource = new CancellationTokenSource();
-            
+
             // 現時点で再生しているBGMがないとき
             if (!isPlayBgm)
             {
@@ -189,7 +189,7 @@ namespace ButterflyDreamUtility.Sound
                 InteractiveLoop().Forget();
                 return;
             }
-            
+
             // 現時点で既にBGMを再生しているとき
             // 再生中のメインチャンネルを取得
             List<AudioSource> playingChannels = new List<AudioSource>(1);
@@ -215,13 +215,13 @@ namespace ButterflyDreamUtility.Sound
                     playingChannel.clip = null;
                 }
                 // フェードチャンネルをメインチャンネルに移動
-                (bgmAudioSources[(int)BgmChannel.Main1], bgmAudioSources[(int)BgmChannel.Fade]) 
+                (bgmAudioSources[(int)BgmChannel.Main1], bgmAudioSources[(int)BgmChannel.Fade])
                     = (bgmAudioSources[(int)BgmChannel.Fade], bgmAudioSources[(int)BgmChannel.Main1]);
                 // 再生中のチャンネルに変化が生じたので、playingChannelsを更新する
                 playingChannels.Clear();
                 playingChannels.Add(bgmAudioSources[(int)BgmChannel.Main1]);
             }
-            
+
             // 現在再生中のチャンネルをフェードアウト
             foreach (var playingChannel in playingChannels)
             {
@@ -234,7 +234,7 @@ namespace ButterflyDreamUtility.Sound
                     channel.clip = null;
                 });
             }
-            
+
             // 次のBGMをフェードチャンネルで再生
             AudioSource fadeChannel = bgmAudioSources[(int) BgmChannel.Fade];
             fadeChannel.clip = bgmAudioClip;
@@ -246,16 +246,16 @@ namespace ButterflyDreamUtility.Sound
             // 現在再生中のBGMを更新
             currentBgmClip = bgmAudioClip;
             // BGM音楽の切り替えをして、その後はインタラクティブループ
-            UniTask.Create(async () =>
+            UniTask.Void(async token =>
             {
-                await UniTask.Delay(TimeSpan.FromSeconds(BGM_FADE_TIME), cancellationToken: bgmCancellationTokenSource.Token);
-                (bgmAudioSources[(int) BgmChannel.Main1], bgmAudioSources[(int) BgmChannel.Fade]) 
+                await UniTask.Delay(TimeSpan.FromSeconds(BGM_FADE_TIME), cancellationToken: token);
+                (bgmAudioSources[(int) BgmChannel.Main1], bgmAudioSources[(int) BgmChannel.Fade])
                     = (bgmAudioSources[(int) BgmChannel.Fade], bgmAudioSources[(int) BgmChannel.Main1]);
                 InteractiveLoop().Forget();
-            });
+            }, bgmCancellationTokenSource.Token);
 
             // インタラクティブループのループ処理
-            async UniTask InteractiveLoop()
+            async UniTaskVoid InteractiveLoop()
             {
                 // 現在再生されているBGMのランダムな時点を取得
                 float bgmLength = bgmAudioSources[(int) BgmChannel.Main1].clip.length;
@@ -282,7 +282,7 @@ namespace ButterflyDreamUtility.Sound
                 }
             }
         }
-        
+
         /// <inheritdoc />
         public void StopBgm(bool isFadeout = false, float duration = BGM_FADE_TIME)
         {
@@ -361,7 +361,7 @@ namespace ButterflyDreamUtility.Sound
         {
             seAudioSource.PlayOneShot(seAudioClip);
         }
-        
+
         /// <inheritdoc />
         public void SetVolumeSe(float value)
         {
@@ -373,7 +373,7 @@ namespace ButterflyDreamUtility.Sound
         {
             voiceAudioSource.PlayOneShot(voiceAudioClip);
         }
-        
+
         /// <inheritdoc />
         public void SetVolumeVoice(float value)
         {
