@@ -1,4 +1,8 @@
+#if ZSTRING_SUPPORT
 using Cysharp.Text;
+#else
+using System.Text;
+#endif
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Profiling;
@@ -68,8 +72,12 @@ namespace ButterflyDreamUtility.Debug
                     // 確保している総メモリ
                     float totalMemory = Profiler.GetTotalReservedMemoryLong() / Mathf.Pow(1024f, (int) memoryUnit);
 
+#if ZSTRING_SUPPORT
                     using (var sb = ZString.CreateStringBuilder(true))
                     {
+#else
+                        StringBuilder sb = new StringBuilder();
+#endif
                         sb.Append("CPU: ");
                         sb.Append(fps.ToString("F0"));
                         sb.Append("fps (");
@@ -86,7 +94,9 @@ namespace ButterflyDreamUtility.Debug
                             _ => "GB" // ここには来ない
                         });
                         nextDebugText = sb.ToString();
+#if ZSTRING_SUPPORT
                     }
+#endif
                 }
 
                 await UniTask.Yield(PlayerLoopTiming.Update, destroyCancellationToken);
