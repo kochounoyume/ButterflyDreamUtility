@@ -1,5 +1,7 @@
 ﻿using System;
+#if ZSTRING_SUPPORT
 using Cysharp.Text;
+#endif
 using Cysharp.Threading.Tasks;
 using TMPro;
 using UnityEngine;
@@ -41,7 +43,11 @@ namespace ButterflyDreamUtility.UI
                         Ping ping = new Ping(pingAddress);
                         await UniTask.WaitUntil(() => ping.isDone, cancellationToken: destroyCancellationToken)
                             .TimeoutWithoutException(pingTimeout);
+#if ZSTRING_SUPPORT
                         textMeshProUGUI.SetTextFormat(PING_FORMAT, ping.time);
+#else
+                        textMeshProUGUI.SetText(PING_FORMAT, ping.time);
+#endif
                         textMeshProUGUI.color = ping.time switch
                         {
                             // 0ms ~ 30msは黄緑で"非常に快適"
@@ -61,7 +67,11 @@ namespace ButterflyDreamUtility.UI
                     catch (TimeoutException)
                     {
                         // タイムアウトしてたら、非常にひどいラグを予想される数値でも表示しておく
+#if ZSTRING_SUPPORT
                         textMeshProUGUI.SetTextFormat(PING_FORMAT, 500);
+#else
+                        textMeshProUGUI.SetText(PING_FORMAT, 500);
+#endif
                         textMeshProUGUI.color = ConstantColor32.magenta;
                     }
                 }
