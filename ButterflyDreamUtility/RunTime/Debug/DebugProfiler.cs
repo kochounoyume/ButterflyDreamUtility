@@ -40,6 +40,12 @@ namespace ButterflyDreamUtility.Debug
         /// </summary>
         private const int FONT_SIZE = 30;
 
+#if !ZSTRING_SUPPORT
+        /// <summary>
+        /// 使いまわせるStringBuilder
+        /// </summary>
+        readonly StringBuilder sb = new StringBuilder();
+#endif
         /// <summary>
         /// 総メモリ使用量表示の単位指定列挙体
         /// </summary>
@@ -60,6 +66,10 @@ namespace ButterflyDreamUtility.Debug
             double lastInterval = Time.realtimeSinceStartup;
             int frames = 0;
 
+#if !ZSTRING_SUPPORT
+            destroyCancellationToken.Register(() => sb.Clear());
+#endif
+
             while (true)
             {
                 frames++;
@@ -76,7 +86,7 @@ namespace ButterflyDreamUtility.Debug
                     using (var sb = ZString.CreateStringBuilder(true))
                     {
 #else
-                        StringBuilder sb = new StringBuilder();
+                    sb.Clear();
 #endif
                         sb.Append("CPU: ");
                         sb.Append(fps.ToString("F0"));
