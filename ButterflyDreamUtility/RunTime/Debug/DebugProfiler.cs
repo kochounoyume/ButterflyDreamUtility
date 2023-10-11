@@ -1,4 +1,4 @@
-#if ZSTRING_SUPPORT
+#if ENABLE_ZSTRING
 using Cysharp.Text;
 #else
 using System.Text;
@@ -40,7 +40,7 @@ namespace ButterflyDreamUtility.Debug
         /// </summary>
         private const int FONT_SIZE = 30;
 
-#if !ZSTRING_SUPPORT
+#if !ENABLE_ZSTRING
         /// <summary>
         /// 使いまわせるStringBuilder
         /// </summary>
@@ -66,7 +66,7 @@ namespace ButterflyDreamUtility.Debug
             double lastInterval = Time.realtimeSinceStartup;
             int frames = 0;
 
-#if !ZSTRING_SUPPORT
+#if !ENABLE_ZSTRING
             destroyCancellationToken.Register(() => sb.Clear());
 #endif
 
@@ -82,7 +82,7 @@ namespace ButterflyDreamUtility.Debug
                     // 確保している総メモリ
                     float totalMemory = Profiler.GetTotalReservedMemoryLong() / Mathf.Pow(1024f, (int) memoryUnit);
 
-#if ZSTRING_SUPPORT
+#if ENABLE_ZSTRING
                     using (var sb = ZString.CreateStringBuilder(true))
                     {
 #else
@@ -104,7 +104,7 @@ namespace ButterflyDreamUtility.Debug
                             _ => "GB" // ここには来ない
                         });
                         nextDebugText = sb.ToString();
-#if ZSTRING_SUPPORT
+#if ENABLE_ZSTRING
                     }
 #endif
                 }
