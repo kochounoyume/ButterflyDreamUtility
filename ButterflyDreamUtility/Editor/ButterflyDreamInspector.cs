@@ -41,7 +41,7 @@ namespace ButterflyDreamUtility.Editor
                     {
                         methodAttrInfo.methodInfo.Invoke(target, methodAttrInfo.attr.parameters);
                     }
-                    catch (TargetParameterCountException e)
+                    catch (TargetParameterCountException)
                     {
                         UnityEngine.Debug.LogError("引数の数の相違によるエラーです");
                     }
