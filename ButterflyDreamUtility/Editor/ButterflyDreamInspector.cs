@@ -45,6 +45,10 @@ namespace ButterflyDreamUtility.Editor
                     {
                         UnityEngine.Debug.LogError("引数の数の相違によるエラーです");
                     }
+                    catch (ArgumentException)
+                    {
+                        UnityEngine.Debug.LogError("引数の型の相違によるエラーです");
+                    }
                 }
             }
         }
