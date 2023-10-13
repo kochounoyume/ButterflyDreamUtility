@@ -25,6 +25,7 @@ namespace ButterflyDreamUtility.Editor
             {
                 var attr = methodInfo.GetCustomAttribute<ButtonAttribute>();
                 if (attr == null) continue;
+                attr.ButtonName = methodInfo.Name;
                 ArrayUtility.Add(ref methodAttrInfos, (methodInfo, attr));
             }
         }
@@ -34,7 +35,7 @@ namespace ButterflyDreamUtility.Editor
             DrawDefaultInspector();
             foreach (var methodAttrInfo in methodAttrInfos)
             {
-                if (GUILayout.Button(methodAttrInfo.attr.buttonName))
+                if (GUILayout.Button(methodAttrInfo.attr.ButtonName))
                 {
                     try
                     {
