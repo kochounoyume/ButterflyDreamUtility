@@ -1,18 +1,26 @@
 using UnityEngine;
+#if UNITY_EDITOR
+using Screen = UnityEngine.Device.Screen;
+#else
+using Screen = UnityEngine.Screen;
+#endif
 
 namespace ButterflyDreamUtility.UI
 {
+    using Attributes;
+
     /// <summary>
     /// セーフエリア調整クラス
     /// <remarks>
     /// DeviceSimulatorにも対応済
     /// </remarks>
     /// </summary>
-    [ExecuteAlways, RequireComponent(typeof(RectTransform))]
+    [RequireComponent(typeof(RectTransform))]
     internal sealed class SafeAreaAdjuster : MonoBehaviour
     {
         private void Start() => Padding();
 
+        [Button("セーフエリア調整")]
         private void Padding()
         {
             RectTransform rectTransform = GetComponent<RectTransform>();
@@ -22,19 +30,5 @@ namespace ButterflyDreamUtility.UI
             rectTransform.anchorMin = safeArea.min / screenSize;
             rectTransform.anchorMax = safeArea.max / screenSize;
         }
-
-#if UNITY_EDITOR
-        private bool isAdjusted = false;
-
-        private void Update()
-        {
-            if(Application.isPlaying && isAdjusted)
-            {
-                isAdjusted = true;
-                return;
-            }
-            Padding();
-        }
-#endif
     }
 }
