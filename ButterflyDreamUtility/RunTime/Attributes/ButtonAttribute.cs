@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 
-namespace ButterflyDreamUtility.Attribute
+namespace ButterflyDreamUtility.Attributes
 {
     /// <summary>
     /// 指定したメソッドをUnityのInspector上に表示したボタンでテスト実行できるようになる属性

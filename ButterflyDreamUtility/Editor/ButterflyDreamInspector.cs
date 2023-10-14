@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace ButterflyDreamUtility.Editor
 {
-    using Attribute;
+    using Attributes;
 
     /// <summary>
     /// デフォルトのインスペクタービュー
