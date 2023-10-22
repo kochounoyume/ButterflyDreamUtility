@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if !UNITY_WEBGL
+using System;
 #if ENABLE_ZSTRING
 using Cysharp.Text;
 #endif
@@ -85,3 +86,4 @@ namespace ButterflyDreamUtility.UI
         }
     }
 }
+#endif
