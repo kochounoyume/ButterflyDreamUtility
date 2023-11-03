@@ -3,6 +3,7 @@ using Cysharp.Text;
 #else
 using System.Text;
 #endif
+using System;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Profiling;
@@ -66,11 +67,7 @@ namespace ButterflyDreamUtility.Debug
             double lastInterval = Time.realtimeSinceStartup;
             int frames = 0;
 
-#if !ENABLE_ZSTRING
-            destroyCancellationToken.Register(() => sb.Clear());
-#endif
-
-            while (true)
+            while (!destroyCancellationToken.IsCancellationRequested)
             {
                 frames++;
                 float timeNow = Time.realtimeSinceStartup;
@@ -126,5 +123,12 @@ namespace ButterflyDreamUtility.Debug
             };
             GUI.Box(debugField, nextDebugText, styleBox);
         }
+
+#if !ENABLE_ZSTRING
+        private void OnDestroy()
+        {
+            sb.Clear();
+        }
+#endif
     }
 }
