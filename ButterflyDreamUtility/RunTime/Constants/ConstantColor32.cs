@@ -13,7 +13,7 @@ namespace ButterflyDreamUtility.Constants
         /// </summary>
         public static Color32 red
         {
-            [MethodImpl((MethodImplOptions) 256)] get => new Color32(255, 0, 0, 255);
+            [MethodImpl(MethodImplOptions.AggressiveInlining)] get => new Color32(255, 0, 0, 255);
         }
 
         /// <summary>
@@ -21,7 +21,7 @@ namespace ButterflyDreamUtility.Constants
         /// </summary>
         public static Color32 green
         {
-            [MethodImpl((MethodImplOptions) 256)] get => new Color32(0, 255, 0, 255);
+            [MethodImpl(MethodImplOptions.AggressiveInlining)] get => new Color32(0, 255, 0, 255);
         }
 
         /// <summary>
@@ -29,7 +29,7 @@ namespace ButterflyDreamUtility.Constants
         /// </summary>
         public static Color32 blue
         {
-            [MethodImpl((MethodImplOptions) 256)] get => new Color32(0, 0, 255, 255);
+            [MethodImpl(MethodImplOptions.AggressiveInlining)] get => new Color32(0, 0, 255, 255);
         }
 
         /// <summary>
@@ -37,7 +37,7 @@ namespace ButterflyDreamUtility.Constants
         /// </summary>
         public static Color32 white
         {
-            [MethodImpl((MethodImplOptions) 256)] get => new Color32(255, 255, 255, 255);
+            [MethodImpl(MethodImplOptions.AggressiveInlining)] get => new Color32(255, 255, 255, 255);
         }
 
         /// <summary>
@@ -45,7 +45,7 @@ namespace ButterflyDreamUtility.Constants
         /// </summary>
         public static Color32 black
         {
-            [MethodImpl((MethodImplOptions) 256)] get => new Color32(0, 0, 0, 255);
+            [MethodImpl(MethodImplOptions.AggressiveInlining)] get => new Color32(0, 0, 0, 255);
         }
 
         /// <summary>
@@ -54,7 +54,7 @@ namespace ButterflyDreamUtility.Constants
         /// </summary>
         public static Color32 yellow
         {
-            [MethodImpl((MethodImplOptions) 256)] get => new Color32(255, 235, 4, 255);
+            [MethodImpl(MethodImplOptions.AggressiveInlining)] get => new Color32(255, 235, 4, 255);
         }
 
         /// <summary>
@@ -62,7 +62,7 @@ namespace ButterflyDreamUtility.Constants
         /// </summary>
         public static Color32 cyan
         {
-            [MethodImpl((MethodImplOptions) 256)] get => new Color32(0, 255, 255, 255);
+            [MethodImpl(MethodImplOptions.AggressiveInlining)] get => new Color32(0, 255, 255, 255);
         }
 
         /// <summary>
@@ -70,7 +70,7 @@ namespace ButterflyDreamUtility.Constants
         /// </summary>
         public static Color32 magenta
         {
-            [MethodImpl((MethodImplOptions) 256)] get => new Color32(255, 0, 255, 255);
+            [MethodImpl(MethodImplOptions.AggressiveInlining)] get => new Color32(255, 0, 255, 255);
         }
 
         /// <summary>
@@ -78,7 +78,7 @@ namespace ButterflyDreamUtility.Constants
         /// </summary>
         public static Color32 gray
         {
-            [MethodImpl((MethodImplOptions) 256)] get => new Color32(128, 128, 128, 255);
+            [MethodImpl(MethodImplOptions.AggressiveInlining)] get => new Color32(128, 128, 128, 255);
         }
 
         /// <summary>
@@ -86,7 +86,7 @@ namespace ButterflyDreamUtility.Constants
         /// </summary>
         public static Color32 grey
         {
-            [MethodImpl((MethodImplOptions) 256)] get => new Color32(128, 128, 128, 255);
+            [MethodImpl(MethodImplOptions.AggressiveInlining)] get => new Color32(128, 128, 128, 255);
         }
 
         /// <summary>
@@ -94,7 +94,7 @@ namespace ButterflyDreamUtility.Constants
         /// </summary>
         public static Color32 clear
         {
-            [MethodImpl((MethodImplOptions) 256)] get => new Color32(0, 0, 0, 0);
+            [MethodImpl(MethodImplOptions.AggressiveInlining)] get => new Color32(0, 0, 0, 0);
         }
 
         /// <summary>
@@ -102,7 +102,7 @@ namespace ButterflyDreamUtility.Constants
         /// </summary>
         public static Color32 orange
         {
-            [MethodImpl((MethodImplOptions) 256)] get => new Color32(255, 165, 0, 255);
+            [MethodImpl(MethodImplOptions.AggressiveInlining)] get => new Color32(255, 165, 0, 255);
         }
 
         /// <summary>
@@ -110,7 +110,7 @@ namespace ButterflyDreamUtility.Constants
         /// </summary>
         public static Color32 lightGreen
         {
-            [MethodImpl((MethodImplOptions) 256)] get => new Color32(188, 255, 0, 255);
+            [MethodImpl(MethodImplOptions.AggressiveInlining)] get => new Color32(188, 255, 0, 255);
         }
     }
 }
