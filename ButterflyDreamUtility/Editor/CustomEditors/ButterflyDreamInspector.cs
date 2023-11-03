@@ -3,7 +3,7 @@ using System.Reflection;
 using UnityEditor;
 using UnityEngine;
 
-namespace ButterflyDreamUtility.Editor
+namespace ButterflyDreamUtility.Editor.CustomEditors
 {
     using Attributes;
 
