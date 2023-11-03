@@ -263,7 +263,7 @@ namespace ButterflyDreamUtility.Sound
                 await UniTask.Delay(
                     TimeSpan.FromSeconds(bgmLength - bgmAudioSources[(int) BgmChannel.Main1].time - BGM_FADE_TIME),
                     cancellationToken: bgmCancellationTokenSource.Token);
-                while (true)
+                while (!bgmCancellationTokenSource.Token.IsCancellationRequested)
                 {
                     // ランダムな始点を取得
                     float randomTime = bgmLength > 30 ? Random.Range(0, bgmLength - 30) : 0;
