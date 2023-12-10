@@ -34,7 +34,7 @@ namespace ButterflyDreamUtility.Network.Ping
 #if ENABLE_ZSTRING
                 textMeshProUGUI.SetTextFormat(IPingChecker.PING_FORMAT, result);
 #else
-                textMeshProUGUI.SetText(pingChecker.pingFormat, ping.time);
+                textMeshProUGUI.SetText(IPingChecker.PING_FORMAT, result);
 #endif
                 textMeshProUGUI.color = result switch
                 {
