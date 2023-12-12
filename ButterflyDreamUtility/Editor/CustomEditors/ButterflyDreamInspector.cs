@@ -23,10 +23,12 @@ namespace ButterflyDreamUtility.Editor.CustomEditors
             // target内のメソッドを全検索してButton属性を持つものを抽出保存
             foreach (MethodInfo methodInfo in target.GetType().GetMethods(BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic))
             {
-                var attr = methodInfo.GetCustomAttribute<ButtonAttribute>();
-                if (attr == null) continue;
-                attr.ButtonName = methodInfo.Name;
-                ArrayUtility.Add(ref methodAttrInfos, (methodInfo, attr));
+                foreach (var attr in methodInfo.GetCustomAttributes<ButtonAttribute>())
+                {
+                    if(attr == null) continue;
+                    attr.ButtonName = methodInfo.Name;
+                    ArrayUtility.Add(ref methodAttrInfos, (methodInfo, attr));
+                }
             }
         }
 

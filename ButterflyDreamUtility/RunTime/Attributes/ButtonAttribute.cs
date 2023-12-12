@@ -6,7 +6,7 @@ namespace ButterflyDreamUtility.Attributes
     /// <summary>
     /// 指定したメソッドをUnityのInspector上に表示したボタンでテスト実行できるようになる属性
     /// </summary>
-    [Conditional("UNITY_EDITOR"), AttributeUsage(AttributeTargets.Method, AllowMultiple = false, Inherited = true)]
+    [Conditional("UNITY_EDITOR"), AttributeUsage(AttributeTargets.Method, AllowMultiple = true, Inherited = true)]
     public sealed class ButtonAttribute : System.Attribute
     {
         /// <summary>
