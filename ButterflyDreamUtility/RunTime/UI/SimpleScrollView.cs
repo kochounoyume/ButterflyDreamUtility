@@ -101,6 +101,7 @@ namespace ButterflyDreamUtility.UI
                 }
                 return m_virtualSizeDelta;
             }
+            set => SetVirtualSizeDelta(ref value);
         }
 
         /// <summary>
@@ -159,28 +160,27 @@ namespace ButterflyDreamUtility.UI
             // MEMO:Vector系の等価評価は浮動小数点の誤差が考慮されている
             if (pointerDelta == Vector2.zero) return;
 
-            float ratio1, ratio2 = default;
+            float posX = default;
+            float posY = default;
             Vector2 anchoredPos;
             switch (scrollDirection)
             {
                 case ScrollDirection.Horizontal:
-                    float halfWidth = (virtualSizeDelta.x - realRect.width) / 2;
-                    float posX = Mathf.Clamp(viewPortStartPos.x + pointerDelta.x, -halfWidth, halfWidth);
-                    ratio1 = Mathf.InverseLerp(-halfWidth, halfWidth, posX);
+                    float limitWidth = (virtualSizeDelta.x - realRect.width) / 2;
+                    posX = Mathf.Clamp(viewPortStartPos.x + pointerDelta.x, -limitWidth, limitWidth);
                     anchoredPos = new Vector2(posX, viewPortStartPos.y);
                     break;
                 case ScrollDirection.Vertical:
-                    float halfHeight = (virtualSizeDelta.y - realRect.height) / 2;
-                    float posY = Mathf.Clamp(viewPortStartPos.y + pointerDelta.y, -halfHeight, halfHeight);
-                    ratio1 = Mathf.InverseLerp(-halfHeight, halfHeight, posY);
+                    float limitHeight = (virtualSizeDelta.y - realRect.height) / 2;
+                    posY = Mathf.Clamp(viewPortStartPos.y + pointerDelta.y, -limitHeight, limitHeight);
                     anchoredPos = new Vector2(viewPortStartPos.x, posY);
                     break;
                 case ScrollDirection.Both:
-                    Vector2 halfSize = (virtualSizeDelta - realSizeDelta) / 2;
+                    Vector2 limitSize = (virtualSizeDelta - realSizeDelta) / 2;
                     Vector2 pos = viewPortStartPos + pointerDelta;
-                    ratio1 = Mathf.InverseLerp(-halfSize.x, halfSize.x, pos.x);
-                    ratio2 = Mathf.InverseLerp(-halfSize.y, halfSize.y, pos.y);
-                    anchoredPos = VectorExtension.Clamp(pos, -halfSize, halfSize);
+                    posX = pos.x;
+                    posY = pos.y;
+                    anchoredPos = VectorExtension.Clamp(ref pos, -limitSize, ref limitSize);
                     break;
                 default:
                     const string message = "スクロール領域がありません";
@@ -188,7 +188,7 @@ namespace ButterflyDreamUtility.UI
                     return;
             }
             viewport.anchoredPosition = anchoredPos;
-            onValueChanged?.Invoke(ratio1, ratio2);
+            onValueChanged?.Invoke(posX, posY);
         }
     }
 }
