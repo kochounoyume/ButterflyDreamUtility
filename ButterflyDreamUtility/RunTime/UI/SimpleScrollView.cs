@@ -13,7 +13,7 @@ namespace ButterflyDreamUtility.UI
         /// <summary>
         /// スクロール方向
         /// </summary>
-        private enum ScrollDirection
+        public enum ScrollAxis
         {
             /// <summary> 横スクロール </summary>
             Horizontal,
@@ -51,15 +51,15 @@ namespace ButterflyDreamUtility.UI
         /// <summary>
         /// スクロールする方向
         /// </summary>
-        private ScrollDirection scrollDirection = ScrollDirection.Vertical;
+        public ScrollAxis scrollAxis { get; private set; } = ScrollAxis.Vertical;
 
         /// <summary>
         /// 縦・横スクロールの際のスクロール時のイベント
         /// <remarks>
-        /// 値は割合で、ScrollDirection.Bothの場合はX・Yの2つの割合値を返す
+        /// 値はスクロール仮想領域の座標基準における、実際の表示範囲サイズの領域
         /// </remarks>
         /// </summary>
-        public event Action<float, float> onValueChanged = null;
+        public event Action<Rect> onValueChanged = null;
 
         /// <summary>
         /// ドラッグを開始した時のタッチ位置
@@ -112,22 +112,23 @@ namespace ButterflyDreamUtility.UI
         {
             if (virtualSize.IsLessThanOrEqual(realSizeDelta))
             {
-                scrollDirection = ScrollDirection.None;
+                scrollAxis = ScrollAxis.None;
             }
             else if(Mathf.Approximately(virtualSize.x, realRect.width))
             {
-                scrollDirection = ScrollDirection.Vertical;
+                scrollAxis = ScrollAxis.Vertical;
             }
             else if (Mathf.Approximately(virtualSize.y, realRect.height))
             {
-                scrollDirection = ScrollDirection.Horizontal;
+                scrollAxis = ScrollAxis.Horizontal;
             }
             else
             {
-                scrollDirection = ScrollDirection.Both;
+                scrollAxis = ScrollAxis.Both;
             }
             tracker.Clear();
-            viewport.sizeDelta = virtualSize;
+            viewport.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, virtualSize.x);
+            viewport.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, virtualSize.y);
             tracker.Add(this, viewport, ConstantDrivenTransformProperties.ExceptXYPos);
         }
 
@@ -160,27 +161,22 @@ namespace ButterflyDreamUtility.UI
             // MEMO:Vector系の等価評価は浮動小数点の誤差が考慮されている
             if (pointerDelta == Vector2.zero) return;
 
-            float posX = default;
-            float posY = default;
             Vector2 anchoredPos;
-            switch (scrollDirection)
+            switch (scrollAxis)
             {
-                case ScrollDirection.Horizontal:
+                case ScrollAxis.Horizontal:
                     float limitWidth = (virtualSizeDelta.x - realRect.width) / 2;
-                    posX = Mathf.Clamp(viewPortStartPos.x + pointerDelta.x, -limitWidth, limitWidth);
+                    float posX = Mathf.Clamp(viewPortStartPos.x + pointerDelta.x, -limitWidth, limitWidth);
                     anchoredPos = new Vector2(posX, viewPortStartPos.y);
                     break;
-                case ScrollDirection.Vertical:
+                case ScrollAxis.Vertical:
                     float limitHeight = (virtualSizeDelta.y - realRect.height) / 2;
-                    posY = Mathf.Clamp(viewPortStartPos.y + pointerDelta.y, -limitHeight, limitHeight);
+                    float posY = Mathf.Clamp(viewPortStartPos.y + pointerDelta.y, -limitHeight, limitHeight);
                     anchoredPos = new Vector2(viewPortStartPos.x, posY);
                     break;
-                case ScrollDirection.Both:
+                case ScrollAxis.Both:
                     Vector2 limitSize = (virtualSizeDelta - realSizeDelta) / 2;
-                    Vector2 pos = viewPortStartPos + pointerDelta;
-                    posX = pos.x;
-                    posY = pos.y;
-                    anchoredPos = VectorExtension.Clamp(ref pos, -limitSize, ref limitSize);
+                    anchoredPos = VectorExtension.Clamp(viewPortStartPos + pointerDelta, -limitSize, ref limitSize);
                     break;
                 default:
                     const string message = "スクロール領域がありません";
@@ -188,7 +184,7 @@ namespace ButterflyDreamUtility.UI
                     return;
             }
             viewport.anchoredPosition = anchoredPos;
-            onValueChanged?.Invoke(posX, posY);
+            onValueChanged?.Invoke(new Rect(anchoredPos, realSizeDelta));
         }
     }
 }
