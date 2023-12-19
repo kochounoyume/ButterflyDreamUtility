@@ -186,5 +186,11 @@ namespace ButterflyDreamUtility.UI
             viewport.anchoredPosition = anchoredPos; ;
             onValueChanged?.Invoke(new Rect(Vector2.zero, realSizeDelta){ center = anchoredPos });
         }
+
+        /// <summary>
+        /// スクロールする関係上、親子の座標系が反転するので、親のRectを子の座標系のRectに変換する
+        /// </summary>
+        /// <param name="rect">対象の親のRect</param>
+        public void ConvertRectInChildRange(ref Rect rect) => rect.center = -rect.center;
     }
 }
