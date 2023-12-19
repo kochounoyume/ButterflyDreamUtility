@@ -183,8 +183,8 @@ namespace ButterflyDreamUtility.UI
                     UnityEngine.Debug.LogWarning(message);
                     return;
             }
-            viewport.anchoredPosition = anchoredPos;
-            onValueChanged?.Invoke(new Rect(anchoredPos, realSizeDelta));
+            viewport.anchoredPosition = anchoredPos; ;
+            onValueChanged?.Invoke(new Rect(Vector2.zero, realSizeDelta){ center = anchoredPos });
         }
     }
 }
