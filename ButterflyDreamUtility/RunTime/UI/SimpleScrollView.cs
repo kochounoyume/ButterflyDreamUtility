@@ -54,6 +54,11 @@ namespace ButterflyDreamUtility.UI
         public ScrollAxis scrollAxis { get; private set; } = ScrollAxis.Vertical;
 
         /// <summary>
+        /// ゲーム開始時、縦・横スクロールの際のスクロール時のイベントを発火するかどうか
+        /// </summary>
+        public bool isInitializeEvent { get; set; } = true;
+
+        /// <summary>
         /// 縦・横スクロールの際のスクロール時のイベント
         /// <remarks>
         /// 値はスクロール仮想領域の座標基準における、実際の表示範囲サイズの領域
@@ -130,6 +135,15 @@ namespace ButterflyDreamUtility.UI
             viewport.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, virtualSize.x);
             viewport.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, virtualSize.y);
             tracker.Add(this, viewport, ConstantDrivenTransformProperties.ExceptXYPos);
+        }
+
+        protected override void Start()
+        {
+            base.Start();
+            if (isInitializeEvent)
+            {
+                onValueChanged?.Invoke(new Rect(Vector2.zero, realSizeDelta){ center = viewport.anchoredPosition });
+            }
         }
 
         // ドラッグが開始される前にBaseInputModuleによって呼び出される
