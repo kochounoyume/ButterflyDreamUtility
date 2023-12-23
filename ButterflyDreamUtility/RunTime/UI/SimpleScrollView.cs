@@ -58,13 +58,28 @@ namespace ButterflyDreamUtility.UI
         /// </summary>
         public bool isInitializeEvent { get; set; } = true;
 
+        private event Action<Rect> onValueChanged = null;
+
         /// <summary>
         /// 縦・横スクロールの際のスクロール時のイベント
         /// <remarks>
         /// 値はスクロール仮想領域の座標基準における、実際の表示範囲サイズの領域
         /// </remarks>
         /// </summary>
-        public event Action<Rect> onValueChanged = null;
+        public event Action<Rect> OnValueChanged
+        {
+            add
+            {
+                onValueChanged = null;
+                // 登録時に初回発火
+                if (isInitializeEvent)
+                {
+                    value?.Invoke(new Rect(Vector2.zero, realSizeDelta){ center = viewport.anchoredPosition });
+                }
+                onValueChanged += value;
+            }
+            remove => onValueChanged -= value;
+        }
 
         /// <summary>
         /// ドラッグを開始した時のタッチ位置
@@ -115,17 +130,21 @@ namespace ButterflyDreamUtility.UI
         /// <param name="virtualSize">任意のサイズ</param>
         public void SetVirtualSizeDelta(ref Vector2 virtualSize)
         {
+            m_virtualSizeDelta = virtualSize;
             if (virtualSize.IsLessThanOrEqual(realSizeDelta))
             {
                 scrollAxis = ScrollAxis.None;
+                viewport.anchoredPosition = Vector2.zero;
             }
             else if(Mathf.Approximately(virtualSize.x, realRect.width))
             {
                 scrollAxis = ScrollAxis.Vertical;
+                viewport.anchoredPosition = new Vector2(0, (- virtualSize.y + realRect.height) / 2);
             }
             else if (Mathf.Approximately(virtualSize.y, realRect.height))
             {
                 scrollAxis = ScrollAxis.Horizontal;
+                viewport.anchoredPosition = new Vector2((-virtualSize.x + realRect.width) / 2, 0);
             }
             else
             {
@@ -135,15 +154,6 @@ namespace ButterflyDreamUtility.UI
             viewport.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, virtualSize.x);
             viewport.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, virtualSize.y);
             tracker.Add(this, viewport, ConstantDrivenTransformProperties.ExceptXYPos);
-        }
-
-        protected override void Start()
-        {
-            base.Start();
-            if (isInitializeEvent)
-            {
-                onValueChanged?.Invoke(new Rect(Vector2.zero, realSizeDelta){ center = viewport.anchoredPosition });
-            }
         }
 
         // ドラッグが開始される前にBaseInputModuleによって呼び出される
