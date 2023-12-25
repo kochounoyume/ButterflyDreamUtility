@@ -51,14 +51,14 @@ namespace ButterflyDreamUtility.UI
         /// <summary>
         /// スクロールする方向
         /// </summary>
-        public ScrollAxis scrollAxis { get; private set; } = ScrollAxis.Vertical;
+        public virtual ScrollAxis scrollAxis { get; protected set; } = ScrollAxis.Vertical;
 
         /// <summary>
         /// ゲーム開始時、縦・横スクロールの際のスクロール時のイベントを発火するかどうか
         /// </summary>
         public bool isInitializeEvent { get; set; } = true;
 
-        private event Action<Rect> onValueChanged = null;
+        protected event Action<Rect> onValueChanged = null;
 
         /// <summary>
         /// 縦・横スクロールの際のスクロール時のイベント
@@ -94,12 +94,12 @@ namespace ButterflyDreamUtility.UI
         /// <summary>
         /// RectTransformのトラッカー
         /// </summary>
-        private DrivenRectTransformTracker tracker = new DrivenRectTransformTracker();
+        protected DrivenRectTransformTracker tracker = new DrivenRectTransformTracker();
 
         /// <summary>
         /// スクロールビューの実際の表示範囲のRect
         /// </summary>
-        private Rect realRect => rectTransform.rect;
+        protected Rect realRect => rectTransform.rect;
 
         /// <summary>
         /// スクロールビューの実際の表示範囲サイズ
@@ -121,7 +121,17 @@ namespace ButterflyDreamUtility.UI
                 }
                 return m_virtualSizeDelta;
             }
-            set => SetVirtualSizeDelta(value);
+            protected set => m_virtualSizeDelta = value;
+        }
+
+        /// <summary>
+        /// スクロールする仮想領域のサイズの設定
+        /// </summary>
+        /// <param name="virtualSizeX">任意のxサイズ</param>
+        /// <param name="virtualSizeY">任意のyサイズ</param>
+        public void SetVirtualSizeDelta(in float virtualSizeX, in float virtualSizeY)
+        {
+            SetVirtualSizeDelta(new Vector2(virtualSizeX, virtualSizeY));
         }
 
         /// <summary>
@@ -130,7 +140,7 @@ namespace ButterflyDreamUtility.UI
         /// <param name="virtualSize">任意のサイズ</param>
         public void SetVirtualSizeDelta(Vector2 virtualSize)
         {
-            m_virtualSizeDelta = virtualSize;
+            virtualSizeDelta = virtualSize;
             if (virtualSize.IsLessThanOrEqual(realSizeDelta))
             {
                 scrollAxis = ScrollAxis.None;
