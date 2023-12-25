@@ -121,14 +121,14 @@ namespace ButterflyDreamUtility.UI
                 }
                 return m_virtualSizeDelta;
             }
-            set => SetVirtualSizeDelta(ref value);
+            set => SetVirtualSizeDelta(value);
         }
 
         /// <summary>
         /// スクロールする仮想領域のサイズの設定
         /// </summary>
         /// <param name="virtualSize">任意のサイズ</param>
-        public void SetVirtualSizeDelta(ref Vector2 virtualSize)
+        public void SetVirtualSizeDelta(Vector2 virtualSize)
         {
             m_virtualSizeDelta = virtualSize;
             if (virtualSize.IsLessThanOrEqual(realSizeDelta))
@@ -200,14 +200,14 @@ namespace ButterflyDreamUtility.UI
                     break;
                 case ScrollAxis.Both:
                     Vector2 limitSize = (virtualSizeDelta - realSizeDelta) / 2;
-                    anchoredPos = VectorExtension.Clamp(viewPortStartPos + pointerDelta, -limitSize, ref limitSize);
+                    anchoredPos = VectorExtension.Clamp(viewPortStartPos + pointerDelta, -limitSize, limitSize);
                     break;
                 default:
                     const string message = "スクロール領域がありません";
                     UnityEngine.Debug.LogWarning(message);
                     return;
             }
-            viewport.anchoredPosition = anchoredPos; ;
+            viewport.anchoredPosition = anchoredPos;
             onValueChanged?.Invoke(new Rect(Vector2.zero, realSizeDelta){ center = anchoredPos });
         }
 
