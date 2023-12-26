@@ -106,6 +106,11 @@ namespace ButterflyDreamUtility.UI
         /// </summary>
         public Vector2 realSizeDelta => rectTransform.rect.size;
 
+        /// <summary>
+        /// スクロールする仮想領域のRect
+        /// </summary>
+        public Rect virtualRect => new Rect(Vector2.zero, realSizeDelta) { center = viewport.anchoredPosition };
+
         private Vector2 m_virtualSizeDelta = Vector2.zero;
 
         /// <summary>
