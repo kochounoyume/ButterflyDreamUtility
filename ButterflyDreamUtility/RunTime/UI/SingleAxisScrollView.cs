@@ -4,7 +4,6 @@ namespace ButterflyDreamUtility.UI
 {
     using Constants;
     using Extensions;
-    using Debug = UnityEngine.Debug;
 
     /// <summary>
     /// 単一方向のみスクロールできるスクロールビュークラス
@@ -17,92 +16,39 @@ namespace ButterflyDreamUtility.UI
             get => base.scrollAxis;
             protected set
             {
-                HasCheckAxis(scrollAxis);
-                base.scrollAxis = value;
+                if (value is ScrollAxis.Horizontal or ScrollAxis.Vertical)
+                {
+                    base.scrollAxis = value;
+                    return;
+                }
+                const string message = "SingleAxisScrollViewは両方向スクロール、スクロールしない設定はできません。";
+                UnityEngine.Debug.LogWarning(message);
             }
-        }
-
-        /// <summary>
-        /// スクロール位置の割合
-        /// </summary>
-        public float scrollRatio
-        {
-            get
-            {
-                try
-                {
-                    HasCheckAxis(scrollAxis);
-                }
-                catch (System.Exception e)
-                {
-                    Debug.LogException(e);
-                    return default;
-                }
-
-                switch (scrollAxis)
-                {
-                    case ScrollAxis.Horizontal:
-                        float minX = -(virtualSizeDelta.x - realRect.width) / 2;
-                        float maxX = (virtualSizeDelta.x - realRect.width) / 2;
-                        return Mathf.InverseLerp(minX, maxX, viewport.anchoredPosition.x) * virtualSizeDelta.y;
-                    case ScrollAxis.Vertical:
-                        float minY = -(virtualSizeDelta.y - realRect.height) / 2;
-                        float maxY = (virtualSizeDelta.y - realRect.height) / 2;
-                        return Mathf.InverseLerp(minY, maxY, viewport.anchoredPosition.y) * virtualSizeDelta.x;
-                    default:
-                        throw new System.NotImplementedException();
-                }
-            }
-            set
-            {
-                HasCheckAxis(scrollAxis);
-                float normalizeValue = Mathf.Clamp01(value);
-
-                switch (scrollAxis)
-                {
-                    case ScrollAxis.Horizontal:
-                        float minX = -(virtualSizeDelta.x - realRect.width) / 2;
-                        float maxX = (virtualSizeDelta.x - realRect.width) / 2;
-                        viewport.anchoredPosition = new Vector2(Mathf.Lerp(minX, maxX, normalizeValue), 0);
-                        break;
-                    case ScrollAxis.Vertical:
-                        float minY = -(virtualSizeDelta.y - realRect.height) / 2;
-                        float maxY = (virtualSizeDelta.y - realRect.height) / 2;
-                        viewport.anchoredPosition = new Vector2(0, Mathf.Lerp(minY, maxY, normalizeValue));
-                        break;
-                    default:
-                        throw new System.NotImplementedException();
-                }
-            }
-        }
-
-        /// <summary>
-        /// スクロール方向が単一方向でないことを通知する
-        /// </summary>
-        private void HasCheckAxis(ScrollAxis axis)
-        {
-            if (axis is ScrollAxis.Horizontal or ScrollAxis.Vertical) return;
-            const string message = "SingleAxisScrollViewは両方向スクロール、スクロールしない設定はできません。";
-            throw new System.ArgumentException(message);
         }
 
         /// <summary>
         /// スクロールする仮想領域のサイズの設定
+        /// <remarks>
+        /// anchoredLengthで指定した長さ分、初期アンカーから距離を開ける
+        /// </remarks>
         /// </summary>
         /// <param name="virtualSizeX">任意のxサイズ</param>
         /// <param name="virtualSizeY">任意のyサイズ</param>
-        /// <param name="ratio">スクロール位置の割合</param>
-        public void SetVirtualSizeDelta(in float virtualSizeX, in float virtualSizeY, in float ratio)
+        /// <param name="anchoredLength">初期アンカーからの長さ</param>
+        public void SetVirtualSizeDelta(in float virtualSizeX, in float virtualSizeY, in float anchoredLength)
         {
-            SetVirtualSizeDelta(new Vector2(virtualSizeX, virtualSizeY), ratio);
+            SetVirtualSizeDelta(new Vector2(virtualSizeX, virtualSizeY), anchoredLength);
         }
 
         /// <summary>
         /// スクロールする仮想領域のサイズの設定
+        /// <remarks>
+        /// anchoredLengthで指定した長さ分、初期アンカーから距離を開ける
+        /// </remarks>
         /// </summary>
         /// <param name="virtualSize">任意のサイズ</param>
-        /// <param name="ratio">スクロール位置の割合</param>
-        public void SetVirtualSizeDelta(Vector2 virtualSize, in float ratio)
+        /// <param name="anchoredLength">初期アンカーからの長さ</param>
+        public void SetVirtualSizeDelta(Vector2 virtualSize, in float anchoredLength)
         {
             virtualSizeDelta = virtualSize;
             if (virtualSize.IsLessThanOrEqual(realSizeDelta))
@@ -113,40 +59,17 @@ namespace ButterflyDreamUtility.UI
             else if(Mathf.Approximately(virtualSize.x, realRect.width))
             {
                 scrollAxis = ScrollAxis.Vertical;
-                scrollRatio = ratio;
+                viewport.anchoredPosition = new Vector2(0, (- virtualSize.y + realRect.height) / 2 + anchoredLength);
             }
             else if (Mathf.Approximately(virtualSize.y, realRect.height))
             {
                 scrollAxis = ScrollAxis.Horizontal;
-                scrollRatio = ratio;
-            }
-            else
-            {
-                scrollAxis = ScrollAxis.Both;
+                viewport.anchoredPosition = new Vector2((- virtualSize.x + realRect.width) / 2 + anchoredLength, 0);
             }
             tracker.Clear();
             viewport.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, virtualSize.x);
             viewport.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, virtualSize.y);
             tracker.Add(this, viewport, ConstantDrivenTransformProperties.ExceptXYPos);
-        }
-
-        /// <summary>
-        /// スクロール割合そのままで、スクロールする仮想領域のサイズを再設定する
-        /// </summary>
-        /// <param name="virtualSizeX">任意のxサイズ</param>
-        /// <param name="virtualSizeY">任意のyサイズ</param>
-        public void SetVirtualSizeInSameRatio(in float virtualSizeX, in float virtualSizeY)
-        {
-            SetVirtualSizeDelta(new Vector2(virtualSizeX, virtualSizeY), scrollRatio);
-        }
-
-        /// <summary>
-        /// スクロール割合そのままで、スクロールする仮想領域のサイズを再設定する
-        /// </summary>
-        /// <param name="virtualSize">任意のサイズ</param>
-        public void SetVirtualSizeInSameRatio(Vector2 virtualSize)
-        {
-            SetVirtualSizeDelta(virtualSize, scrollRatio);
         }
     }
 }
