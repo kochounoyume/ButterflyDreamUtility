@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Threading;
 using Cysharp.Threading.Tasks;
-using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 
@@ -11,7 +10,7 @@ namespace ButterflyDreamUtility.UI
     /// <summary>
     /// 同時押しと連打の対策がされているボタン
     /// </summary>
-    [RequireComponent(typeof(Graphic))]
+    [UnityEngine.RequireComponent(typeof(Graphic))]
     public sealed class CustomButton : Selectable, IPointerClickHandler
     {
         /// <summary>
