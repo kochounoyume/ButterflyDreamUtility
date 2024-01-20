@@ -33,11 +33,17 @@ namespace ButterflyDreamUtility.UI
         /// </summary>
         public event Action onClick = null;
 
+        private readonly List<AsyncLazy> onClickAsyncList = new ();
+
         /// <summary>
         /// ボタン押下時に発火するイベント（非同期）
         /// <remarks>同時押し禁止・連打禁止に加えて登録イベントの処理終了も押下判定の再開に引っ掛ける</remarks>
         /// </summary>
-        public event Func<CancellationToken, UniTask> onClickAsync = null;
+        public event Func<CancellationToken, UniTask> onClickAsync
+        {
+            add => onClickAsyncList.Add(UniTask.Lazy(async () => await value(cancellationToken)));
+            remove => onClickAsyncList.Remove(UniTask.Lazy(async () => await value(cancellationToken)));
+        }
 
         /// <summary>
         /// 有効なCustomButtonを全て取得する
@@ -108,7 +114,7 @@ namespace ButterflyDreamUtility.UI
 
             // 同時押し対策
             var customButtons = allOnClickCustomButtons;
-            List<UniTask> tasks = new List<UniTask>(customButtons.Count + (onClickAsync is null ? 0 : 1));
+            List<UniTask> tasks = new List<UniTask>(customButtons.Count + onClickAsyncList.Count);
             foreach (CustomButton btn in customButtons)
             {
                 tasks.Add(UniTask.Defer(async () =>
@@ -118,9 +124,9 @@ namespace ButterflyDreamUtility.UI
             }
 
             // 登録されていた非同期イベントの登録
-            if (onClickAsync is not null)
+            foreach (AsyncLazy asyncLazy in onClickAsyncList)
             {
-                tasks.Add(onClickAsync(cancellationToken));
+                tasks.Add(asyncLazy.Task);
             }
 
             UniTask.Void(async uniTasks =>
